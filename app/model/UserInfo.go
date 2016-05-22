@@ -6,4 +6,5 @@ type RegisterUserInfo struct {
 	Password  string `json:"password"`
 	QQ        string `json:"qq"`
 	Telephone string `json:"telephone"`
+	AgentID   int
 }

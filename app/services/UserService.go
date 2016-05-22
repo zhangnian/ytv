@@ -21,10 +21,37 @@ const (
 type UserService struct {
 }
 
+func (this UserService) GetAgent(host string, source string) (agentId int) {
+	if len(host) > 0 {
+		sql := `SELECT id FROM tb_agents WHERE host_key = ?`
+		rows := db.Query(sql, host)
+		if rows == nil {
+			revel.ERROR.Println("获取用户所属子公司失败")
+			agentId = 0
+		}
+
+		if rows.Next() {
+			rows.Scan(&agentId)
+		}
+	} else {
+		sql := `SELECT id FROM tb_agents WHERE query_key = ?`
+		rows := db.Query(sql, source)
+		if rows == nil {
+			revel.ERROR.Println("获取用户所属子公司失败")
+			agentId = 0
+		}
+
+		if rows.Next() {
+			rows.Scan(&agentId)
+		}
+	}
+	return
+}
+
 func (this UserService) Register(info model.RegisterUserInfo) (int, error) {
-	sql := `INSERT INTO tb_users(username, nickname, telephone, qq, password, role_id, create_time, modify_time, last_time)
-		   VALUES(?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())`
-	rs, err := db.Exec(sql, info.UserName, info.NickName, info.Telephone, info.QQ, info.Password, USER_TYPE_NORMAL)
+	sql := `INSERT INTO tb_users(username, nickname, telephone, qq, password, agent_id, role_id, create_time, modify_time, last_time)
+		   VALUES(?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())`
+	rs, err := db.Exec(sql, info.UserName, info.NickName, info.Telephone, info.QQ, info.Password, info.AgentID, USER_TYPE_NORMAL)
 	if err != nil {
 		revel.ERROR.Printf("DB返回失败: %s\n", err.Error())
 		return 0, err

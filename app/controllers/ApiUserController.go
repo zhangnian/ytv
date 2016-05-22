@@ -39,6 +39,21 @@ func (c ApiUserController) Register() revel.Result {
 	var info model.RegisterUserInfo
 	json.NewDecoder(c.Request.Body).Decode(&info)
 
+	// 获取用户所属子公司
+	/*
+		fmt.Println(c.Request.Header)
+		if host, ok := c.Request.Header["customer"]; ok {
+			revel.INFO.Println("host: ", host)
+		} else {
+			revel.INFO.Println("未传入host")
+		}
+	*/
+
+	agentId := userService.GetAgent("sz.ytv.com", c.Params.Get("source"))
+	revel.INFO.Println("agentId: ", agentId)
+
+	info.AgentID = agentId
+
 	userid, err := userService.Register(info)
 	if err != nil {
 		return c.RenderError(-1, "注册失败")
