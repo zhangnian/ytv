@@ -103,21 +103,21 @@ func Init() {
 	initRedis()
 }
 
-func Query(sql string, args ...interface{}) *sql.Rows {
+func Query(sql string, args ...interface{}) (*sql.Rows, error) {
 	stmt, err := db.Prepare(sql)
 	if err != nil {
 		revel.ERROR.Printf("Query执行失败, 错误信息: %s\n", err.Error())
-		return nil
+		return nil, err
 	}
 	defer stmt.Close()
 
 	row, err := stmt.Query(args...)
 	if err != nil {
 		revel.ERROR.Printf("Query执行失败, 错误信息: %s\n", err.Error())
-		return nil
+		return nil, err
 	}
 
-	return row
+	return row, nil
 }
 
 func Exec(sql string, args ...interface{}) (sql.Result, error) {

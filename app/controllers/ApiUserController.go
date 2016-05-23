@@ -32,7 +32,20 @@ func (c ApiUserController) Login() revel.Result {
 		return c.RenderError(-1, "登录失败")
 	}
 
-	return c.RenderOK(map[string]interface{}{"userid": userid, "token": token})
+	userinfo := userService.GetBasicInfo(userid)
+	if userinfo == nil {
+		return c.RenderError(-1, "获取用户数据失败")
+	}
+
+	data := make(map[string]interface{})
+	data["userid"] = userid
+	data["token"] = token
+	data["nickname"] = userinfo.NickName
+	data["telephone"] = userinfo.Telephone
+	data["qq"] = userinfo.QQ
+	data["email"] = userinfo.Email
+
+	return c.RenderOK(data)
 }
 
 func (c ApiUserController) Register() revel.Result {
@@ -65,7 +78,20 @@ func (c ApiUserController) Register() revel.Result {
 		return c.RenderError(-1, "刷新token失败")
 	}
 
-	return c.RenderOK(map[string]interface{}{"userid": userid, "token": token})
+	userinfo := userService.GetBasicInfo(userid)
+	if userinfo == nil {
+		return c.RenderError(-1, "获取用户数据失败")
+	}
+
+	data := make(map[string]interface{})
+	data["userid"] = userid
+	data["token"] = token
+	data["nickname"] = userinfo.NickName
+	data["telephone"] = userinfo.Telephone
+	data["qq"] = userinfo.QQ
+	data["email"] = userinfo.Email
+
+	return c.RenderOK(data)
 }
 
 func (c ApiUserController) GetCode() revel.Result {

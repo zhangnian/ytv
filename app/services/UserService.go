@@ -24,9 +24,11 @@ type UserService struct {
 func (this UserService) GetAgent(host string, source string) (agentId int) {
 	if len(host) > 0 {
 		sql := `SELECT id FROM tb_agents WHERE host_key = ?`
-		rows := db.Query(sql, host)
+		rows, err := db.Query(sql, host)
+		checkSQLError(err)
+
 		if rows == nil {
-			revel.ERROR.Println("获取用户所属子公司失败")
+			revel.ERROR.Println("查无数据")
 			agentId = 0
 		}
 
@@ -35,9 +37,11 @@ func (this UserService) GetAgent(host string, source string) (agentId int) {
 		}
 	} else {
 		sql := `SELECT id FROM tb_agents WHERE query_key = ?`
-		rows := db.Query(sql, source)
+		rows, err := db.Query(sql, source)
+		checkSQLError(err)
+
 		if rows == nil {
-			revel.ERROR.Println("获取用户所属子公司失败")
+			revel.ERROR.Println("查无数据")
 			agentId = 0
 		}
 
@@ -67,7 +71,9 @@ func (this UserService) Register(info model.RegisterUserInfo) (int, error) {
 }
 
 func (this UserService) GetUserId(username, password string) (int, error) {
-	rows := db.Query("select id from tb_users where username = ? and password = ?", username, password)
+	rows, err := db.Query("select id from tb_users where username = ? and password = ?", username, password)
+	checkSQLError(err)
+
 	if rows == nil {
 		return 0, errors.New("查询用户数据失败")
 	}
@@ -120,11 +126,8 @@ func (this UserService) CanAccessAPI(userid int, apiUrl string) bool {
 	sql := `SELECT r.allow_api, r.deny_api FROM tb_users u
 			LEFT JOIN tb_roles r ON u.role_id = r.id
 			WHERE u.id = ?`
-	rows := db.Query(sql, userid)
-	if rows == nil {
-		revel.ERROR.Printf("查询用户%d权限数据失败\n", userid)
-		return false
-	}
+	rows, err := db.Query(sql, userid)
+	checkSQLError(err)
 
 	var allowdApi, denyApi string
 	if rows.Next() {
@@ -198,4 +201,23 @@ func (this UserService) CheckToken(userid int, token string) bool {
 	}
 
 	return oldToken == token
+}
+
+func (this UserService) GetBasicInfo(userid int) *model.BasicUserInfo {
+	sql := `SELECT nickname, email, telephone, qq FROM tb_users WHERE id = ?`
+	rows, err := db.Query(sql, userid)
+	checkSQLError(err)
+
+	if rows == nil {
+		revel.ERROR.Println("查无数据")
+		return nil
+	}
+
+	if rows.Next() {
+		info := &model.BasicUserInfo{}
+		rows.Scan(&info.NickName, &info.Email, &info.Telephone, &info.QQ)
+		return info
+	}
+
+	return nil
 }

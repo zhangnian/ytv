@@ -8,3 +8,10 @@ type RegisterUserInfo struct {
 	Telephone string `json:"telephone"`
 	AgentID   int
 }
+
+type BasicUserInfo struct {
+	NickName  string
+	Telephone string
+	Email     string
+	QQ        string
+}
