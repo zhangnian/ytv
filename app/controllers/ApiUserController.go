@@ -83,6 +83,11 @@ func (c ApiUserController) GetCode() revel.Result {
 	code := r.Intn(9999)
 	strCode := fmt.Sprintf("%04d", code)
 
+	err := commService.SendCode(telephone, strCode)
+	if err != nil {
+		return c.RenderError(-1, "发送验证码失败")
+	}
+
 	if !userService.SaveCode(telephone, strCode) {
 		return c.RenderError(-1, "保存验证码失败")
 	}

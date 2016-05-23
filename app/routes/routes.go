@@ -79,6 +79,18 @@ func (_ tTestRunner) List(
 }
 
 
+type tApiInfoController struct {}
+var ApiInfoController tApiInfoController
+
+
+func (_ tApiInfoController) Announcement(
+		) string {
+	args := make(map[string]string)
+	
+	return revel.MainRouter.Reverse("ApiInfoController.Announcement", args).Url
+}
+
+
 type tApiUserController struct {}
 var ApiUserController tApiUserController
 
