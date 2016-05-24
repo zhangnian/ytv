@@ -79,6 +79,20 @@ func (_ tTestRunner) List(
 }
 
 
+type tApiChatController struct {}
+var ApiChatController tApiChatController
+
+
+func (_ tApiChatController) HandleClient(
+		ws interface{},
+		) string {
+	args := make(map[string]string)
+	
+	revel.Unbind(args, "ws", ws)
+	return revel.MainRouter.Reverse("ApiChatController.HandleClient", args).Url
+}
+
+
 type tApiInfoController struct {}
 var ApiInfoController tApiInfoController
 

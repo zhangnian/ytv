@@ -7,3 +7,5 @@ GET      /user/:action   	ApiUserController.:action
 GET		 /info/:action      ApiInfoController.:action
 
 POST     /user/register     ApiUserController.Register
+
+WS       /chat              ApiChatController.HandleClient

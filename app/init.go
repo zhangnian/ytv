@@ -29,9 +29,12 @@ func init() {
 	// ( order dependent )
 	revel.OnAppStart(func() {
 		db.Init()
+
 		services.InitService()
+
 		controllers.InitService()
 		controllers.InitAOP()
+		controllers.InitChatServer()
 	})
 	// revel.OnAppStart(FillCache)
 }
