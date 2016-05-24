@@ -21,3 +21,13 @@ func (c ApiInfoController) Announcement() revel.Result {
 
 	return c.RenderOK(data)
 }
+
+func (c ApiInfoController) Timetable() revel.Result {
+	data := infoService.GetTimeTable()
+	return c.RenderOK(data)
+}
+
+func (c ApiInfoController) TransactionTips() revel.Result {
+	data := infoService.GetTransactionTips()
+	return c.RenderOK(data)
+}
