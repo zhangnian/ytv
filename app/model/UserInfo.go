@@ -14,4 +14,6 @@ type BasicUserInfo struct {
 	Telephone string
 	Email     string
 	QQ        string
+	Level     int
+	Avatar    string
 }

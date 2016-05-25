@@ -24,10 +24,12 @@ func (c ApiBaseController) UserId() int {
 
 func (c ApiBaseController) RenderOK(data interface{}) revel.Result {
 	resp := model.NewSuccResp(data)
+	c.Response.Out.Header().Set("Access-Control-Allow-Origin", "*")
 	return c.RenderJson(resp)
 }
 
 func (c ApiBaseController) RenderError(code int, msg string) revel.Result {
 	resp := model.NewErrorResp(code, msg)
+	c.Response.Out.Header().Set("Access-Control-Allow-Origin", "*")
 	return c.RenderJson(resp)
 }

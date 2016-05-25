@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+const (
+	MAX_RETRY = 3
+)
+
 var (
 	db        *sql.DB
 	RedisConn redis.Conn
@@ -20,9 +24,11 @@ func pingDB() {
 		err := db.Ping()
 		if err != nil {
 			revel.ERROR.Printf("PING MYSQL失败, error: %s\n", err.Error())
-			continue
+			break
 		}
 	}
+
+	initDB()
 }
 
 func pingRedis() {
@@ -32,9 +38,12 @@ func pingRedis() {
 		if err != nil {
 			revel.ERROR.Printf("PING Redis失败, error: %s\n", err.Error())
 			RedisConn.Close()
-			continue
+			break
 		}
 	}
+
+	// 重连
+	initRedis()
 }
 
 func initDB() {
@@ -68,9 +77,23 @@ func initDB() {
 	connStr := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8", user, passwd, host, port, dbname)
 	dbConn, err := sql.Open("mysql", connStr)
 	if err != nil {
-		panic("连接MYSQL失败")
+		revel.ERROR.Printf("连接MySQL失败, 开始重试, error: %s\n", err.Error())
+		retry := 0
+		for ; retry < MAX_RETRY; retry++ {
+			dbConn, err := sql.Open("mysql", connStr)
+			if err == nil {
+				db = dbConn
+				break
+			}
+			time.Sleep(time.Second * 3)
+		}
+		if retry == MAX_RETRY {
+			revel.ERROR.Println("重连MySQL失败，程序退出")
+			panic(err)
+		}
+	} else {
+		db = dbConn
 	}
-	db = dbConn
 
 	go pingDB()
 }
@@ -91,10 +114,24 @@ func initRedis() {
 	connStr := fmt.Sprintf("%s:%d", host, port)
 	c, err := redis.Dial("tcp", connStr)
 	if err != nil {
-		panic("连接Redis失败")
+		revel.ERROR.Printf("连接Redis失败, 开始重试, error: %s\n", err.Error())
+		retry := 0
+		for ; retry < MAX_RETRY; retry++ {
+			c, err := redis.Dial("tcp", connStr)
+			if err == nil {
+				RedisConn = c
+				break
+			}
+			time.Sleep(time.Second * 3)
+		}
+		if retry == MAX_RETRY {
+			revel.ERROR.Println("重连Redis失败，程序退出")
+			panic(err)
+		}
+	} else {
+		RedisConn = c
 	}
 
-	RedisConn = c
 	go pingRedis()
 }
 

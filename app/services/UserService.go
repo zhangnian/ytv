@@ -2,6 +2,7 @@ package services
 
 import (
 	"crypto/md5"
+	"database/sql"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -11,6 +12,7 @@ import (
 	"time"
 	"ytv/app/db"
 	"ytv/app/model"
+	"ytv/app/utils"
 )
 
 const (
@@ -53,13 +55,19 @@ func (this UserService) GetAgent(host string, source string) (agentId int) {
 }
 
 func (this UserService) Register(info model.RegisterUserInfo) (int, error) {
-	sql := `INSERT INTO tb_users(username, nickname, telephone, qq, password, agent_id, role_id, create_time, modify_time, last_time)
-		   VALUES(?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())`
-	rs, err := db.Exec(sql, info.UserName, info.NickName, info.Telephone, info.QQ, info.Password, info.AgentID, USER_TYPE_NORMAL)
-	if err != nil {
-		revel.ERROR.Printf("DB返回失败: %s\n", err.Error())
-		return 0, err
+	// 随机选一张头像
+	sql := `SELECT avatar FROM tb_avatar_pool ORDER BY RAND() LIMIT 0, 1`
+	rows, err := db.Query(sql)
+	checkSQLError(err)
+	avatar := ""
+	if rows.Next() {
+		rows.Scan(&avatar)
 	}
+
+	sql = `INSERT INTO tb_users(username, nickname, telephone, qq, password, agent_id, role_id, avatar, create_time, modify_time, last_time)
+		   VALUES(?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())`
+	rs, err := db.Exec(sql, info.UserName, info.NickName, info.Telephone, info.QQ, info.Password, info.AgentID, USER_TYPE_NORMAL, avatar)
+	checkSQLError(err)
 
 	insertId, err := rs.LastInsertId()
 	if err != nil {
@@ -132,7 +140,6 @@ func (this UserService) CanAccessAPI(userid int, apiUrl string) bool {
 	var allowdApi, denyApi string
 	if rows.Next() {
 		rows.Scan(&allowdApi, &denyApi)
-		revel.INFO.Println(allowdApi, denyApi)
 
 		// 先匹配黑名单
 		if len(denyApi) > 0 {
@@ -204,8 +211,7 @@ func (this UserService) CheckToken(userid int, token string) bool {
 }
 
 func (this UserService) GetBasicInfo(userid int) *model.BasicUserInfo {
-	sql := `SELECT nickname, email, telephone, qq FROM tb_users WHERE id = ?`
-	rows, err := db.Query(sql, userid)
+	rows, err := db.Query(`SELECT nickname, email, telephone, qq, level, avatar FROM tb_users WHERE id = ?`, userid)
 	checkSQLError(err)
 
 	if rows == nil {
@@ -215,7 +221,18 @@ func (this UserService) GetBasicInfo(userid int) *model.BasicUserInfo {
 
 	if rows.Next() {
 		info := &model.BasicUserInfo{}
-		rows.Scan(&info.NickName, &info.Email, &info.Telephone, &info.QQ)
+
+		var email, telephone, qq sql.NullString
+
+		err := rows.Scan(&info.NickName, &email, &telephone, &qq, &info.Level, &info.Avatar)
+		if err != nil {
+			revel.ERROR.Printf("rows.Scan error: %s\n", err.Error())
+			return nil
+		}
+
+		info.Email = utils.DefaultString(email)
+		info.Telephone = utils.DefaultString(telephone)
+		info.QQ = utils.DefaultString(qq)
 		return info
 	}
 

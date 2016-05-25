@@ -20,35 +20,6 @@ func (_ tApiBaseController) RenderError(
 }
 
 
-type tStatic struct {}
-var Static tStatic
-
-
-func (_ tStatic) Serve(
-		prefix string,
-		filepath string,
-		) string {
-	args := make(map[string]string)
-	
-	revel.Unbind(args, "prefix", prefix)
-	revel.Unbind(args, "filepath", filepath)
-	return revel.MainRouter.Reverse("Static.Serve", args).Url
-}
-
-func (_ tStatic) ServeModule(
-		moduleName string,
-		prefix string,
-		filepath string,
-		) string {
-	args := make(map[string]string)
-	
-	revel.Unbind(args, "moduleName", moduleName)
-	revel.Unbind(args, "prefix", prefix)
-	revel.Unbind(args, "filepath", filepath)
-	return revel.MainRouter.Reverse("Static.ServeModule", args).Url
-}
-
-
 type tTestRunner struct {}
 var TestRunner tTestRunner
 
@@ -79,6 +50,35 @@ func (_ tTestRunner) List(
 }
 
 
+type tStatic struct {}
+var Static tStatic
+
+
+func (_ tStatic) Serve(
+		prefix string,
+		filepath string,
+		) string {
+	args := make(map[string]string)
+	
+	revel.Unbind(args, "prefix", prefix)
+	revel.Unbind(args, "filepath", filepath)
+	return revel.MainRouter.Reverse("Static.Serve", args).Url
+}
+
+func (_ tStatic) ServeModule(
+		moduleName string,
+		prefix string,
+		filepath string,
+		) string {
+	args := make(map[string]string)
+	
+	revel.Unbind(args, "moduleName", moduleName)
+	revel.Unbind(args, "prefix", prefix)
+	revel.Unbind(args, "filepath", filepath)
+	return revel.MainRouter.Reverse("Static.ServeModule", args).Url
+}
+
+
 type tApiChatController struct {}
 var ApiChatController tApiChatController
 
@@ -90,6 +90,20 @@ func (_ tApiChatController) HandleClient(
 	
 	revel.Unbind(args, "ws", ws)
 	return revel.MainRouter.Reverse("ApiChatController.HandleClient", args).Url
+}
+
+func (_ tApiChatController) Total(
+		) string {
+	args := make(map[string]string)
+	
+	return revel.MainRouter.Reverse("ApiChatController.Total", args).Url
+}
+
+func (_ tApiChatController) Users(
+		) string {
+	args := make(map[string]string)
+	
+	return revel.MainRouter.Reverse("ApiChatController.Users", args).Url
 }
 
 

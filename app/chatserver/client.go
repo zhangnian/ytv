@@ -1,19 +1,31 @@
 package chatserver
 
 import (
+	"encoding/json"
 	"github.com/revel/revel"
 	"golang.org/x/net/websocket"
+	"time"
+	"ytv/app/db"
+	"ytv/app/model"
 )
 
 // 一个客户端的websocket连接
 type Client struct {
-	UserId int
-	Conn   *websocket.Conn
-	Send   chan string // 消息发送缓冲区，用于向客户端推送消息
+	UserId   int
+	Conn     *websocket.Conn
+	Send     chan string          // 消息发送缓冲区，用于向客户端推送消息
+	UserInfo *model.BasicUserInfo // 用户基本数据
 }
 
+// 创建一个在线用户
 func NewClient(userid int, conn *websocket.Conn) *Client {
-	client := &Client{UserId: userid, Conn: conn, Send: make(chan string, 512)}
+	userinfo := userService.GetBasicInfo(userid)
+	if userinfo == nil {
+		revel.ERROR.Printf("查询用户: %d数据失败\n", userid)
+		return nil
+	}
+
+	client := &Client{UserId: userid, Conn: conn, Send: make(chan string, 128), UserInfo: userinfo}
 	return client
 }
 
@@ -39,7 +51,36 @@ func (this *Client) RecvMessage() {
 }
 
 func (this *Client) handleMessage(msg string) {
-	Broadcast <- msg
+	var rm RoomMessage
+	if err := json.Unmarshal([]byte(msg), &rm); err != nil {
+		revel.ERROR.Printf("消息格式错误, error: %s\n", err.Error())
+		return
+	}
+
+	rm.NickName = this.UserInfo.NickName
+	rm.Avatar = this.UserInfo.Avatar
+	rm.Level = this.UserInfo.Level
+	rm.CreateTime = int(time.Now().Unix())
+
+	data, err := json.Marshal(rm)
+	if err != nil {
+		revel.ERROR.Printf("序列化消息失败, error: %s\n", err.Error())
+		return
+	}
+	// 存储消息
+	this.storeMessage(rm.UserId, string(data), rm.Content)
+
+	// 广播消息
+	Broadcast <- string(data)
+}
+
+func (this *Client) storeMessage(userid int, data string, msg string) {
+	sql := `INSERT INTO tb_chat_room(userid, content, msg_body, create_time) VALUES(?, ?, ?, NOW())`
+	_, err := db.Exec(sql, userid, string(data), msg)
+	if err != nil {
+		revel.ERROR.Printf("存储消息失败, error: %s\n", err.Error())
+		return
+	}
 }
 
 func (this *Client) Close() {

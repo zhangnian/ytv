@@ -3,9 +3,10 @@
 
 
 # 用户模块
-GET      /user/:action   	ApiUserController.:action
-GET		 /info/:action      ApiInfoController.:action
+GET      /user/:action   		ApiUserController.:action
+GET		 /info/:action      	ApiInfoController.:action
 
-POST     /user/register     ApiUserController.Register
+POST     /user/register    	 	ApiUserController.Register
 
-WS       /chat              ApiChatController.HandleClient
+WS       /chat              	ApiChatController.HandleClient
+GET 	 /chat/:action   		ApiChatController.:action
