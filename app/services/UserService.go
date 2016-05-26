@@ -25,32 +25,34 @@ type UserService struct {
 
 func (this UserService) GetAgent(host string, source string) (agentId int) {
 	if len(host) > 0 {
+		revel.INFO.Println("根据host查询, host: ", host)
 		sql := `SELECT id FROM tb_agents WHERE host_key = ?`
 		rows, err := db.Query(sql, host)
 		checkSQLError(err)
 
-		if rows == nil {
-			revel.ERROR.Println("查无数据")
-			agentId = 0
+		if rows != nil && rows.Next() {
+			err := rows.Scan(&agentId)
+			if err == nil && agentId > 0 {
+				return
+			}
 		}
+	}
 
-		if rows.Next() {
-			rows.Scan(&agentId)
-		}
-	} else {
+	if len(source) > 0 {
+		revel.INFO.Println("根据source查询, source: ", source)
 		sql := `SELECT id FROM tb_agents WHERE query_key = ?`
 		rows, err := db.Query(sql, source)
 		checkSQLError(err)
 
-		if rows == nil {
-			revel.ERROR.Println("查无数据")
-			agentId = 0
-		}
-
-		if rows.Next() {
-			rows.Scan(&agentId)
+		if rows != nil && rows.Next() {
+			err := rows.Scan(&agentId)
+			if err == nil && agentId > 0 {
+				return
+			}
 		}
 	}
+
+	agentId = 0
 	return
 }
 
@@ -211,7 +213,7 @@ func (this UserService) CheckToken(userid int, token string) bool {
 }
 
 func (this UserService) GetBasicInfo(userid int) *model.BasicUserInfo {
-	rows, err := db.Query(`SELECT nickname, email, telephone, qq, level, avatar FROM tb_users WHERE id = ?`, userid)
+	rows, err := db.Query(`SELECT nickname, email, telephone, qq, level, avatar, agent_id FROM tb_users WHERE id = ?`, userid)
 	checkSQLError(err)
 
 	if rows == nil {
@@ -224,9 +226,9 @@ func (this UserService) GetBasicInfo(userid int) *model.BasicUserInfo {
 
 		var email, telephone, qq sql.NullString
 
-		err := rows.Scan(&info.NickName, &email, &telephone, &qq, &info.Level, &info.Avatar)
+		err := rows.Scan(&info.NickName, &email, &telephone, &qq, &info.Level, &info.Avatar, &info.AgentId)
 		if err != nil {
-			revel.ERROR.Printf("rows.Scan error: %s\n", err.Error())
+			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			return nil
 		}
 

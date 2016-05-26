@@ -2,7 +2,6 @@ package chatserver
 
 import (
 	"container/list"
-	"github.com/revel/revel"
 	"ytv/app/services"
 )
 
@@ -25,13 +24,15 @@ func NewServer() *Server {
 
 func (this Server) JoinClient(cli *Client) {
 	// 断开同一个用户的上一个连接
-	for item := this.Clients.Front(); item != nil; item = item.Next() {
-		client := item.Value.(*Client)
-		if client.UserId == cli.UserId {
-			client.Close()
-			break
+	/*
+		for item := this.Clients.Front(); item != nil; item = item.Next() {
+			client := item.Value.(*Client)
+			if client.UserId == cli.UserId {
+				client.Close()
+				break
+			}
 		}
-	}
+	*/
 
 	this.Clients.PushBack(cli)
 }
@@ -75,7 +76,7 @@ func (this Server) runLoop() {
 	for {
 		select {
 		case msg := <-Broadcast:
-			revel.INFO.Printf("开始广播消息: %s\n", msg)
+			//revel.INFO.Printf("开始广播消息: %s\n", msg)
 			for item := this.Clients.Front(); item != nil; item = item.Next() {
 				client := item.Value.(*Client)
 				client.Send <- msg

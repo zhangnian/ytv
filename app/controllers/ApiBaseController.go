@@ -22,6 +22,14 @@ func (c ApiBaseController) UserId() int {
 	return int(rs)
 }
 
+func (c ApiBaseController) Host() string {
+	return c.Request.Host
+}
+
+func (c ApiBaseController) Source() string {
+	return c.Params.Get("source")
+}
+
 func (c ApiBaseController) RenderOK(data interface{}) revel.Result {
 	resp := model.NewSuccResp(data)
 	c.Response.Out.Header().Set("Access-Control-Allow-Origin", "*")

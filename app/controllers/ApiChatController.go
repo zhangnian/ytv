@@ -12,7 +12,7 @@ type ApiChatController struct {
 
 func (c ApiChatController) HandleClient(ws *websocket.Conn) revel.Result {
 	userid := c.UserId()
-	revel.ERROR.Printf("用户: %d进入聊天室\n", userid)
+	revel.INFO.Printf("用户: %d进入聊天室\n", userid)
 
 	client := chatserver.NewClient(userid, ws)
 	if client == nil {

@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/revel/revel"
+	"strings"
 	"ytv/app/db"
 	"ytv/app/model"
 )
@@ -14,7 +15,6 @@ func (this InfoService) GetLastAnnouncement() *model.Announcement {
 	sql := `SELECT title, content, create_time FROM tb_announcement ORDER BY id DESC`
 	rows, err := db.Query(sql)
 	checkSQLError(err)
-
 	if rows == nil {
 		revel.ERROR.Println("查无数据")
 		return nil
@@ -22,7 +22,12 @@ func (this InfoService) GetLastAnnouncement() *model.Announcement {
 
 	if rows.Next() {
 		announcement := &model.Announcement{}
-		rows.Scan(&announcement.Title, &announcement.Content, &announcement.CreateTime)
+		err := rows.Scan(&announcement.Title, &announcement.Content, &announcement.CreateTime)
+		if err != nil {
+			revel.ERROR.Printf("rows.Scan error: %s\n", err)
+			return nil
+		}
+
 		return announcement
 	}
 
@@ -44,7 +49,11 @@ func (this InfoService) GetTimeTable() []model.ClassInfo {
 
 	for rows.Next() {
 		var info model.ClassInfo
-		rows.Scan(&info.Id, &info.TechTime, &info.Monday, &info.Tuesday, &info.Wednesday, &info.Thursday, &info.Friday, &info.Saturday, &info.Sunday)
+		err := rows.Scan(&info.Id, &info.TechTime, &info.Monday, &info.Tuesday, &info.Wednesday, &info.Thursday, &info.Friday, &info.Saturday, &info.Sunday)
+		if err != nil {
+			revel.ERROR.Printf("rows.Scan error: %s\n", err)
+			continue
+		}
 
 		chassInfo = append(chassInfo, info)
 	}
@@ -68,11 +77,41 @@ func (this InfoService) GetTransactionTips() []model.TransactionTip {
 		var info model.TransactionTip
 		err := rows.Scan(&info.Id, &info.Title, &info.Content, &info.CreateTime)
 		if err != nil {
-			revel.ERROR.Println(err.Error())
+			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			continue
 		}
 
 		tips = append(tips, info)
 	}
 	return tips
+}
+
+func (this InfoService) GetAgentConfig(agentId int) map[string]interface{} {
+	sql := `SELECT logo_url, cs_qq FROM tb_agents WHERE id = ?`
+	rows, err := db.Query(sql, agentId)
+	checkSQLError(err)
+
+	var agentInfo map[string]interface{}
+	if rows == nil {
+		revel.ERROR.Println("查无数据")
+		return agentInfo
+	}
+
+	if rows.Next() {
+		agentInfo = make(map[string]interface{})
+
+		var logoUrl, csQQ string
+		err := rows.Scan(&logoUrl, &csQQ)
+		if err != nil {
+			revel.ERROR.Printf("rows.Scan error: %s\n", err)
+			return nil
+		}
+
+		qqList := strings.Split(csQQ, "|")
+
+		agentInfo["logo"] = logoUrl
+		agentInfo["qq"] = qqList
+	}
+
+	return agentInfo
 }

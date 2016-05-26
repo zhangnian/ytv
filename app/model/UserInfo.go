@@ -16,4 +16,5 @@ type BasicUserInfo struct {
 	QQ        string
 	Level     int
 	Avatar    string
+	AgentId   int
 }
