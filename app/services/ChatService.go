@@ -31,7 +31,7 @@ func (this ChatService) GetMsgCount() int {
 }
 
 func (this ChatService) GetHistoryMsg(pageNo int, pageSize int) []interface{} {
-	sql := `SELECT content FROM tb_chat_room ORDER BY create_time DESC LIMIT ?, ?`
+	sql := `SELECT content FROM tb_chat_room WHERE TO_DAYS(create_time) = TO_DAYS(NOW()) ORDER BY create_time DESC LIMIT ?, ?`
 	rows, err := db.Query(sql, (pageNo-1)*pageSize, pageSize)
 	checkSQLError(err)
 
