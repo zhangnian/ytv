@@ -29,8 +29,9 @@ func (this UserService) GetAgent(host string, source string) (agentId int) {
 		sql := `SELECT id FROM tb_agents WHERE host_key = ?`
 		rows, err := db.Query(sql, host)
 		checkSQLError(err)
+		defer rows.Close()
 
-		if rows != nil && rows.Next() {
+		if rows.Next() {
 			err := rows.Scan(&agentId)
 			if err == nil && agentId > 0 {
 				return
@@ -43,8 +44,9 @@ func (this UserService) GetAgent(host string, source string) (agentId int) {
 		sql := `SELECT id FROM tb_agents WHERE query_key = ?`
 		rows, err := db.Query(sql, source)
 		checkSQLError(err)
+		defer rows.Close()
 
-		if rows != nil && rows.Next() {
+		if rows.Next() {
 			err := rows.Scan(&agentId)
 			if err == nil && agentId > 0 {
 				return
@@ -61,6 +63,8 @@ func (this UserService) Register(info model.RegisterUserInfo) (int, error) {
 	sql := `SELECT avatar FROM tb_avatar_pool ORDER BY RAND() LIMIT 0, 1`
 	rows, err := db.Query(sql)
 	checkSQLError(err)
+	defer rows.Close()
+
 	avatar := ""
 	if rows.Next() {
 		rows.Scan(&avatar)
@@ -83,10 +87,6 @@ func (this UserService) Register(info model.RegisterUserInfo) (int, error) {
 func (this UserService) GetUserId(username, password string) (int, error) {
 	rows, err := db.Query("select id from tb_users where username = ? and password = ?", username, password)
 	checkSQLError(err)
-
-	if rows == nil {
-		return 0, errors.New("查询用户数据失败")
-	}
 	defer rows.Close()
 
 	if rows.Next() {
@@ -138,6 +138,7 @@ func (this UserService) CanAccessAPI(userid int, apiUrl string) bool {
 			WHERE u.id = ?`
 	rows, err := db.Query(sql, userid)
 	checkSQLError(err)
+	defer rows.Close()
 
 	var allowdApi, denyApi string
 	if rows.Next() {
@@ -215,11 +216,7 @@ func (this UserService) CheckToken(userid int, token string) bool {
 func (this UserService) GetBasicInfo(userid int) *model.BasicUserInfo {
 	rows, err := db.Query(`SELECT nickname, email, telephone, qq, level, avatar, agent_id FROM tb_users WHERE id = ?`, userid)
 	checkSQLError(err)
-
-	if rows == nil {
-		revel.ERROR.Println("查无数据")
-		return nil
-	}
+	defer rows.Close()
 
 	if rows.Next() {
 		info := &model.BasicUserInfo{}

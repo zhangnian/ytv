@@ -17,12 +17,9 @@ func (this ChatService) GetLastMsg() []interface{} {
 func (this ChatService) GetMsgCount() int {
 	rows, err := db.Query(`SELECT COUNT(id) FROM tb_chat_room`)
 	checkSQLError(err)
-	if rows == nil {
-		return 0
-	}
+	defer rows.Close()
 
 	var count int
-
 	if rows.Next() {
 		rows.Scan(&count)
 	}
@@ -34,12 +31,9 @@ func (this ChatService) GetHistoryMsg(pageNo int, pageSize int) []interface{} {
 	sql := `SELECT content FROM tb_chat_room WHERE TO_DAYS(create_time) = TO_DAYS(NOW()) ORDER BY create_time DESC LIMIT ?, ?`
 	rows, err := db.Query(sql, (pageNo-1)*pageSize, pageSize)
 	checkSQLError(err)
+	defer rows.Close()
 
 	msgList := make([]interface{}, 0)
-	if rows == nil {
-		return msgList
-	}
-
 	for rows.Next() {
 		var content string
 		err := rows.Scan(&content)

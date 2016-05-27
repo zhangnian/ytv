@@ -21,11 +21,13 @@ var (
 func pingDB() {
 	for {
 		time.Sleep(time.Second * 60)
+
 		err := db.Ping()
 		if err != nil {
 			revel.ERROR.Printf("PING MYSQL失败, error: %s\n", err.Error())
 			break
 		}
+
 	}
 
 	initDB()
@@ -148,13 +150,13 @@ func Query(sql string, args ...interface{}) (*sql.Rows, error) {
 	}
 	defer stmt.Close()
 
-	row, err := stmt.Query(args...)
+	rows, err := stmt.Query(args...)
 	if err != nil {
 		revel.ERROR.Printf("Query执行失败, 错误信息: %s\n", err.Error())
 		return nil, err
 	}
 
-	return row, nil
+	return rows, nil
 }
 
 func Exec(sql string, args ...interface{}) (sql.Result, error) {
