@@ -10,25 +10,27 @@ import (
 type InfoService struct {
 }
 
-func (this InfoService) GetLastAnnouncement() *model.Announcement {
-
+func (this InfoService) GetLastAnnouncement() map[string]interface{} {
 	sql := `SELECT title, content, create_time FROM tb_announcement ORDER BY id DESC`
 	rows, err := db.Query(sql)
 	checkSQLError(err)
 	defer rows.Close()
 
+	data := make(map[string]interface{})
 	if rows.Next() {
-		announcement := &model.Announcement{}
-		err := rows.Scan(&announcement.Title, &announcement.Content, &announcement.CreateTime)
+		var title, content, create_time string
+		err := rows.Scan(&title, &content, &create_time)
 		if err != nil {
-			revel.ERROR.Printf("rows.Scan error: %s\n", err)
-			return nil
+			revel.ERROR.Println("rows.Scan error: ", err)
+			return data
 		}
 
-		return announcement
+		data["title"] = title
+		data["content"] = content
+		data["create_time"] = create_time
 	}
 
-	return nil
+	return data
 }
 
 func (this InfoService) GetTimeTable() []model.ClassInfo {
@@ -54,20 +56,27 @@ func (this InfoService) GetTimeTable() []model.ClassInfo {
 	return chassInfo
 }
 
-func (this InfoService) GetTransactionTips() []model.TransactionTip {
+func (this InfoService) GetTransactionTips() []interface{} {
 	sql := `SELECT id, title, content, create_time FROM tb_transaction_tips ORDER BY create_time DESC`
 	rows, err := db.Query(sql)
 	checkSQLError(err)
 	defer rows.Close()
 
-	tips := make([]model.TransactionTip, 0)
+	tips := make([]interface{}, 0)
 	for rows.Next() {
-		var info model.TransactionTip
-		err := rows.Scan(&info.Id, &info.Title, &info.Content, &info.CreateTime)
+		info := make(map[string]interface{})
+		var id int
+		var title, content, create_time string
+
+		err := rows.Scan(&id, &title, &content, &create_time)
 		if err != nil {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			continue
 		}
+		info["id"] = id
+		info["title"] = title
+		info["content"] = content
+		info["create_time"] = create_time
 		tips = append(tips, info)
 	}
 	return tips
