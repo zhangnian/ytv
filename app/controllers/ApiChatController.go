@@ -43,3 +43,28 @@ func (c ApiChatController) Users() revel.Result {
 	data := chatServer.ClientsInfo()
 	return c.RenderOK(data)
 }
+
+func (c ApiChatController) LastMsg() revel.Result {
+	data := chatService.GetLastMsg()
+	return c.RenderOK(data)
+}
+
+func (c ApiChatController) HistoryMsg() revel.Result {
+	var pageNo, pageSize int
+	c.Params.Bind(&pageNo, "page_no")
+	c.Params.Bind(&pageSize, "page_size")
+
+	if pageNo <= 0 {
+		return c.RenderError(-1, "参数不合法")
+	}
+
+	if pageSize == 0 || pageSize > 50 {
+		pageSize = 50
+	}
+
+	data := make(map[string]interface{})
+	data["total"] = chatService.GetMsgCount()
+	data["msg"] = chatService.GetHistoryMsg(pageNo, pageSize)
+
+	return c.RenderOK(data)
+}

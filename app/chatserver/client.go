@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"github.com/revel/revel"
 	"golang.org/x/net/websocket"
-	"time"
 	"ytv/app/db"
 	"ytv/app/model"
+	"ytv/app/utils"
 )
 
 // 一个客户端的websocket连接
@@ -19,14 +19,11 @@ type Client struct {
 
 // 创建一个在线用户
 func NewClient(userid int, conn *websocket.Conn) *Client {
-	/*
-		userinfo := userService.GetBasicInfo(userid)
-		if userinfo == nil {
-			revel.ERROR.Printf("查询用户: %d数据失败\n", userid)
-			return nil
-		}
-	*/
-	userinfo := &model.BasicUserInfo{NickName: "zn", Telephone: "18664574705", QQ: "237063121", Email: "", Level: 1, Avatar: ""}
+	userinfo := userService.GetBasicInfo(userid)
+	if userinfo == nil {
+		revel.ERROR.Printf("查询用户: %d数据失败\n", userid)
+		return nil
+	}
 
 	client := &Client{UserId: userid, Conn: conn, Send: make(chan string, 128), UserInfo: userinfo}
 	return client
@@ -63,7 +60,7 @@ func (this *Client) handleMessage(msg string) {
 	rm.NickName = this.UserInfo.NickName
 	rm.Avatar = this.UserInfo.Avatar
 	rm.Level = this.UserInfo.Level
-	rm.CreateTime = int(time.Now().Unix())
+	rm.CreateTime = utils.CurTimeStr()
 
 	data, err := json.Marshal(rm)
 	if err != nil {
@@ -71,7 +68,7 @@ func (this *Client) handleMessage(msg string) {
 		return
 	}
 	// 存储消息
-	//this.storeMessage(rm.UserId, string(data), rm.Content)
+	this.storeMessage(rm.UserId, string(data), rm.Content)
 
 	// 广播消息
 	Broadcast <- string(data)

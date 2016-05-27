@@ -8,12 +8,14 @@ var (
 	UserS *UserService
 	InfoS *InfoService
 	CommS *CommService
+	ChatS *ChatService
 )
 
 func InitService() {
 	UserS = &UserService{}
 	InfoS = &InfoService{}
 	CommS = &CommService{}
+	ChatS = &ChatService{}
 }
 
 func checkSQLError(err error) {

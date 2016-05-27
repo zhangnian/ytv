@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -21,7 +20,6 @@ func init() {
 }
 
 func Update(key string, is_succ bool, cost int) {
-	fmt.Println("Update cost: ", cost)
 	locker.Lock()
 	defer locker.Unlock()
 
@@ -33,12 +31,9 @@ func Update(key string, is_succ bool, cost int) {
 		data = &ApiStat{Total: 1, Cost: cost}
 	}
 
-	fmt.Println("data.Cost: ", data.Cost)
 	if is_succ {
 		data.Succ += 1
 	}
 
 	statMap[key] = data
-
-	fmt.Printf("%s -> %v\n", key, data)
 }

@@ -11,7 +11,7 @@ type RoomMessage struct {
 	Avatar     string `json:"avatar"`
 	Level      int    `json:"level"`
 	Content    string `json:"content"`
-	CreateTime int    `json:"CreateTime"`
+	CreateTime string `json:"CreateTime"`
 }
 
 var (
