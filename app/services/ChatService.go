@@ -11,7 +11,31 @@ type ChatService struct {
 }
 
 func (this ChatService) GetLastMsg() []interface{} {
-	return this.GetHistoryMsg(1, 10)
+	sql := `SELECT content FROM tb_chat_room ORDER BY create_time DESC LIMIT 0, 10`
+	rows, err := db.Query(sql)
+	checkSQLError(err)
+	defer rows.Close()
+
+	msgList := make([]interface{}, 0)
+	for rows.Next() {
+		var content string
+		err := rows.Scan(&content)
+		if err != nil {
+			revel.ERROR.Printf("rows.Scan error: %s\n", err)
+			continue
+		}
+
+		var msg interface{}
+		err = json.Unmarshal([]byte(content), &msg)
+		if err != nil {
+			revel.ERROR.Println("json.Unmarshal error: ", err)
+			continue
+		}
+
+		msgList = append(msgList, msg)
+	}
+
+	return msgList
 }
 
 func (this ChatService) GetMsgCount() int {
