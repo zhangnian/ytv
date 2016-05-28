@@ -74,7 +74,6 @@ func (this Server) runLoop() {
 	for {
 		select {
 		case msg := <-Broadcast:
-			//revel.INFO.Printf("开始广播消息: %s\n", msg)
 			for item := this.Clients.Front(); item != nil; item = item.Next() {
 				client := item.Value.(*Client)
 				client.Send <- msg
