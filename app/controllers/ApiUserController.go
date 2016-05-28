@@ -39,13 +39,8 @@ func (c ApiUserController) Login() revel.Result {
 
 	data := make(map[string]interface{})
 	data["userid"] = userid
-	data["avatar"] = userinfo.Avatar
 	data["token"] = token
-	data["nickname"] = userinfo.NickName
-	data["telephone"] = userinfo.Telephone
-	data["qq"] = userinfo.QQ
-	data["email"] = userinfo.Email
-
+	data["basic"] = userinfo
 	return c.RenderOK(data)
 }
 
@@ -78,13 +73,8 @@ func (c ApiUserController) Register() revel.Result {
 
 	data := make(map[string]interface{})
 	data["userid"] = userid
-	data["avatar"] = userinfo.Avatar
 	data["token"] = token
-	data["nickname"] = userinfo.NickName
-	data["telephone"] = userinfo.Telephone
-	data["qq"] = userinfo.QQ
-	data["email"] = userinfo.Email
-
+	data["basic"] = userinfo
 	return c.RenderOK(data)
 }
 

@@ -2,7 +2,6 @@ package services
 
 import (
 	"crypto/md5"
-	"database/sql"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -12,7 +11,6 @@ import (
 	"time"
 	"ytv/app/db"
 	"ytv/app/model"
-	"ytv/app/utils"
 )
 
 const (
@@ -213,27 +211,30 @@ func (this UserService) CheckToken(userid int, token string) bool {
 	return oldToken == token
 }
 
-func (this UserService) GetBasicInfo(userid int) *model.BasicUserInfo {
+func (this UserService) GetBasicInfo(userid int) map[string]interface{} {
 	rows, err := db.Query(`SELECT nickname, email, telephone, qq, level, avatar, agent_id FROM tb_users WHERE id = ?`, userid)
 	checkSQLError(err)
 	defer rows.Close()
 
+	data := make(map[string]interface{})
 	if rows.Next() {
-		info := &model.BasicUserInfo{}
+		var nickname, email, telephone, qq, avatar string
+		var level, agentId int
 
-		var email, telephone, qq sql.NullString
-
-		err := rows.Scan(&info.NickName, &email, &telephone, &qq, &info.Level, &info.Avatar, &info.AgentId)
+		err := rows.Scan(&nickname, &email, &telephone, &qq, &level, &avatar, &agentId)
 		if err != nil {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			return nil
 		}
 
-		info.Email = utils.DefaultString(email)
-		info.Telephone = utils.DefaultString(telephone)
-		info.QQ = utils.DefaultString(qq)
-		return info
+		data["nickname"] = nickname
+		data["email"] = email
+		data["telphone"] = telephone
+		data["qq"] = qq
+		data["avatar"] = avatar
+		data["level"] = level
+		data["agentId"] = agentId
 	}
 
-	return nil
+	return data
 }

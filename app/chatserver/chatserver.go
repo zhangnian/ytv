@@ -58,9 +58,9 @@ func (this Server) ClientsInfo() []interface{} {
 
 		infoMap := make(map[string]interface{})
 		infoMap["userid"] = client.UserId
-		infoMap["nickname"] = userinfo.NickName
-		infoMap["avator"] = userinfo.Avatar
-		infoMap["level"] = userinfo.Level
+		infoMap["nickname"] = userinfo["nickname"]
+		infoMap["avatar"] = userinfo["avatar"]
+		infoMap["level"] = userinfo["level"]
 		clientsInfo = append(clientsInfo, infoMap)
 	}
 	return clientsInfo

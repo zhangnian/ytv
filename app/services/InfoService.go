@@ -4,7 +4,6 @@ import (
 	"github.com/revel/revel"
 	"strings"
 	"ytv/app/db"
-	"ytv/app/model"
 )
 
 type InfoService struct {
@@ -33,7 +32,7 @@ func (this InfoService) GetLastAnnouncement() map[string]interface{} {
 	return data
 }
 
-func (this InfoService) GetTimeTable() []model.ClassInfo {
+func (this InfoService) GetTimeTable() []interface{} {
 	sql := `SELECT id, tech_time, monday, tuesday, wednesday, thursday, friday, saturday, sunday 
 		   FROM tb_timetable ORDER BY order_key ASC
 		  `
@@ -41,19 +40,31 @@ func (this InfoService) GetTimeTable() []model.ClassInfo {
 	checkSQLError(err)
 	defer rows.Close()
 
-	chassInfo := make([]model.ClassInfo, 0)
+	data := make([]interface{}, 0)
 	for rows.Next() {
-		var info model.ClassInfo
-		err := rows.Scan(&info.Id, &info.TechTime, &info.Monday, &info.Tuesday, &info.Wednesday, &info.Thursday, &info.Friday, &info.Saturday, &info.Sunday)
+		info := make(map[string]interface{})
+
+		var id int
+		var tech_time, monday, tuesday, wednesday, thursday, friday, saturday, sunday string
+		err := rows.Scan(&id, &tech_time, &monday, &tuesday, &wednesday, &thursday, &friday, &saturday, &sunday)
 		if err != nil {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			continue
 		}
+		info["id"] = id
+		info["tech_time"] = tech_time
+		info["monday"] = monday
+		info["tuesday"] = tuesday
+		info["wednesday"] = wednesday
+		info["thursday"] = thursday
+		info["friday"] = friday
+		info["saturday"] = saturday
+		info["sunday"] = sunday
 
-		chassInfo = append(chassInfo, info)
+		data = append(data, info)
 	}
 
-	return chassInfo
+	return data
 }
 
 func (this InfoService) GetTransactionTips() []interface{} {

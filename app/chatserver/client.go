@@ -5,7 +5,6 @@ import (
 	"github.com/revel/revel"
 	"golang.org/x/net/websocket"
 	"ytv/app/db"
-	"ytv/app/model"
 	"ytv/app/utils"
 )
 
@@ -13,8 +12,8 @@ import (
 type Client struct {
 	UserId   int
 	Conn     *websocket.Conn
-	Send     chan string          // 消息发送缓冲区，用于向客户端推送消息
-	UserInfo *model.BasicUserInfo // 用户基本数据
+	Send     chan string            // 消息发送缓冲区，用于向客户端推送消息
+	UserInfo map[string]interface{} // 用户基本数据
 }
 
 // 创建一个在线用户
@@ -57,9 +56,9 @@ func (this *Client) handleMessage(msg string) {
 		return
 	}
 
-	rm.NickName = this.UserInfo.NickName
-	rm.Avatar = this.UserInfo.Avatar
-	rm.Level = this.UserInfo.Level
+	rm.NickName = this.UserInfo["nickname"].(string)
+	rm.Avatar = this.UserInfo["avatar"].(string)
+	rm.Level = this.UserInfo["level"].(int)
 	rm.CreateTime = utils.CurTimeStr()
 
 	data, err := json.Marshal(rm)
