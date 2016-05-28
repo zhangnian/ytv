@@ -94,23 +94,23 @@ func (this InfoService) GetTransactionTips() []interface{} {
 }
 
 func (this InfoService) GetAgentConfig(agentId int) map[string]interface{} {
-	sql := `SELECT logo_url, cs_qq FROM tb_agents WHERE id = ?`
+	sql := `SELECT logo_url, qr_code, cs_qq FROM tb_agents WHERE id = ?`
 	rows, err := db.Query(sql, agentId)
 	checkSQLError(err)
 	defer rows.Close()
 
 	agentInfo := make(map[string]interface{})
 	if rows.Next() {
-		var logoUrl, csQQ string
-		err := rows.Scan(&logoUrl, &csQQ)
+		var logoUrl, qrCode, csQQ string
+		err := rows.Scan(&logoUrl, &qrCode, &csQQ)
 		if err != nil {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			return agentInfo
 		}
-
 		qqList := strings.Split(csQQ, "|")
 
 		agentInfo["logo"] = logoUrl
+		agentInfo["qrcode"] = qrCode
 		agentInfo["qq"] = qqList
 	}
 

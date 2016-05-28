@@ -83,11 +83,12 @@ func (this *Client) storeMessage(userid int, data string, msg string) {
 }
 
 func (this *Client) Close() {
-	if this.Conn != nil {
-		if err := this.Conn.Close(); err != nil {
-			revel.ERROR.Printf("关闭用户: %d连接失败, error: %s", this.UserId, err.Error())
-		}
+	if this.Conn == nil {
+		return
 	}
 
 	close(this.Send)
+	if err := this.Conn.Close(); err != nil {
+		revel.ERROR.Printf("关闭用户: %d连接失败, error: %s", this.UserId, err.Error())
+	}
 }
