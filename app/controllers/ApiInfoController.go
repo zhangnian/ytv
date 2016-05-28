@@ -36,3 +36,8 @@ func (c ApiInfoController) Config() revel.Result {
 	data := infoService.GetAgentConfig(agentId)
 	return c.RenderOK(data)
 }
+
+func (c ApiInfoController) Teachers() revel.Result {
+	data := infoService.GetTeachers()
+	return c.RenderOK(data)
+}

@@ -105,7 +105,7 @@ func (this InfoService) GetAgentConfig(agentId int) map[string]interface{} {
 		err := rows.Scan(&logoUrl, &csQQ)
 		if err != nil {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
-			return nil
+			return agentInfo
 		}
 
 		qqList := strings.Split(csQQ, "|")
@@ -115,4 +115,24 @@ func (this InfoService) GetAgentConfig(agentId int) map[string]interface{} {
 	}
 
 	return agentInfo
+}
+
+func (this InfoService) GetTeachers() []string {
+	rows, err := db.Query(`SELECT desc_url FROM tb_teachers`)
+	checkSQLError(err)
+	defer rows.Close()
+
+	data := make([]string, 0)
+	for rows.Next() {
+		var desc_url string
+		err := rows.Scan(&desc_url)
+		if err != nil {
+			revel.ERROR.Printf("rows.Scan error: %s\n", err)
+			continue
+		}
+
+		data = append(data, desc_url)
+	}
+
+	return data
 }
