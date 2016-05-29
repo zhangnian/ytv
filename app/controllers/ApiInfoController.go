@@ -9,8 +9,8 @@ type ApiInfoController struct {
 }
 
 // 滚屏公告
-func (c ApiInfoController) Announcement() revel.Result {
-	data := infoService.GetLastAnnouncement()
+func (c ApiInfoController) Announcements() revel.Result {
+	data := infoService.GetAnnouncements()
 	return c.RenderOK(data)
 }
 

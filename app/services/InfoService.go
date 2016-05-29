@@ -9,24 +9,26 @@ import (
 type InfoService struct {
 }
 
-func (this InfoService) GetLastAnnouncement() map[string]interface{} {
-	sql := `SELECT title, content, create_time FROM tb_announcement ORDER BY id DESC`
+func (this InfoService) GetAnnouncements() []interface{} {
+	sql := `SELECT title, content FROM tb_announcement ORDER BY id ASC`
 	rows, err := db.Query(sql)
 	checkSQLError(err)
 	defer rows.Close()
 
-	data := make(map[string]interface{})
-	if rows.Next() {
-		var title, content, create_time string
-		err := rows.Scan(&title, &content, &create_time)
+	data := make([]interface{}, 0)
+	for rows.Next() {
+		var title, content string
+		err := rows.Scan(&title, &content)
 		if err != nil {
 			revel.ERROR.Println("rows.Scan error: ", err)
-			return data
+			continue
 		}
 
-		data["title"] = title
-		data["content"] = content
-		data["create_time"] = create_time
+		info := make(map[string]interface{})
+		info["title"] = title
+		info["content"] = content
+
+		data = append(data, info)
 	}
 
 	return data
