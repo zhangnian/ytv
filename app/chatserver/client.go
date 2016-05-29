@@ -2,9 +2,9 @@ package chatserver
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/revel/revel"
 	"golang.org/x/net/websocket"
-	"ytv/app/db"
 	"ytv/app/utils"
 )
 
@@ -66,20 +66,19 @@ func (this *Client) handleMessage(msg string) {
 		revel.ERROR.Printf("序列化消息失败, error: %s\n", err.Error())
 		return
 	}
-	// 存储消息
-	this.storeMessage(rm.UserId, string(data), rm.Content)
 
 	// 广播消息
 	Broadcast <- string(data)
+
+	// 存储消息
+	this.storeMessage(rm.UserId, string(data), rm.Content)
 }
 
 func (this *Client) storeMessage(userid int, data string, msg string) {
-	sql := `INSERT INTO tb_chat_room(userid, content, msg_body, create_time) VALUES(?, ?, ?, NOW())`
-	_, err := db.Exec(sql, userid, string(data), msg)
-	if err != nil {
-		revel.ERROR.Printf("存储消息失败, error: %s\n", err.Error())
-		return
-	}
+	sqlCmd := fmt.Sprintf("INSERT INTO tb_chat_room(userid, content, msg_body, create_time) VALUES(%d, '%s', '%s', NOW())",
+		userid, data, msg)
+
+	cmdQueue <- sqlCmd
 }
 
 func (this *Client) Close() {

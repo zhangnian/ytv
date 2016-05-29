@@ -67,6 +67,9 @@ func (this Server) ClientsInfo() []interface{} {
 }
 
 func (this Server) Run() {
+	cmdQueue = make(chan string, 128)
+
+	go StoreMessageToDB()
 	go this.runLoop()
 }
 
