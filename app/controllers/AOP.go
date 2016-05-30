@@ -38,7 +38,7 @@ func validateUser(c *revel.Controller) revel.Result {
 
 	// 验证token
 	if !userService.CheckToken(userid, token) {
-		resp := model.NewErrorResp(-1, "Token验证失败")
+		resp := model.NewErrorResp(-9, "Token验证失败")
 		return c.RenderJson(resp)
 	}
 

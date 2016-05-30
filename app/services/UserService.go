@@ -203,12 +203,13 @@ func (this UserService) GetToken(userid int) (string, error) {
 }
 
 func (this UserService) CheckToken(userid int, token string) bool {
-	oldToken, err := this.GetToken(userid)
+	dbToken, err := this.GetToken(userid)
 	if err != nil {
 		return false
 	}
 
-	return oldToken == token
+	revel.INFO.Printf("user token: %s, db token:%s\n", token, dbToken)
+	return dbToken == token
 }
 
 func (this UserService) GetBasicInfo(userid int) map[string]interface{} {

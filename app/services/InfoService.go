@@ -96,15 +96,15 @@ func (this InfoService) GetTransactionTips() []interface{} {
 }
 
 func (this InfoService) GetAgentConfig(agentId int) map[string]interface{} {
-	sql := `SELECT logo_url, qr_code, cs_qq, share_qrcode FROM tb_agents WHERE id = ?`
+	sql := `SELECT logo_url, qr_code, cs_qq, share_qrcode, help_url, support_url, website_url, download_url, cs_telephone FROM tb_agents WHERE id = ?`
 	rows, err := db.Query(sql, agentId)
 	checkSQLError(err)
 	defer rows.Close()
 
 	agentInfo := make(map[string]interface{})
 	if rows.Next() {
-		var logoUrl, qrCode, csQQ, shareQRCode string
-		err := rows.Scan(&logoUrl, &qrCode, &csQQ, &shareQRCode)
+		var logoUrl, qrCode, csQQ, shareQRCode, helpUrl, supportUrl, websiteUrl, downloadUrl, csTelephone string
+		err := rows.Scan(&logoUrl, &qrCode, &csQQ, &shareQRCode, &helpUrl, &supportUrl, &websiteUrl, &downloadUrl, &csTelephone)
 		if err != nil {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			return agentInfo
@@ -115,6 +115,11 @@ func (this InfoService) GetAgentConfig(agentId int) map[string]interface{} {
 		agentInfo["qrcode"] = qrCode
 		agentInfo["sharecode"] = shareQRCode
 		agentInfo["qq"] = qqList
+		agentInfo["help_url"] = helpUrl
+		agentInfo["support_url"] = supportUrl
+		agentInfo["website_url"] = websiteUrl
+		agentInfo["download_url"] = downloadUrl
+		agentInfo["cs_telephone"] = csTelephone
 	}
 
 	return agentInfo
@@ -137,5 +142,34 @@ func (this InfoService) GetTeachers() []string {
 		data = append(data, desc_url)
 	}
 
+	return data
+}
+
+func (this InfoService) GetVideoConfig() map[string]interface{} {
+	sql := `SELECT t.id, t.name, t.avatar, title, announcement, video_url, islive FROM tb_video_config v
+		   LEFT JOIN tb_teachers t ON v.teacher_id = t.id`
+
+	rows, err := db.Query(sql)
+	checkSQLError(err)
+
+	data := make(map[string]interface{})
+	if rows.Next() {
+		var teacherId, isLive int
+		var teacherName, avatar, title, announcement, videoUrl string
+
+		err := rows.Scan(&teacherId, &teacherName, &avatar, &title, &announcement, &videoUrl, &isLive)
+		if err != nil {
+			revel.ERROR.Printf("rows.Scan error: %s\n", err)
+			return data
+		}
+
+		data["teacher_id"] = teacherId
+		data["teacher_name"] = teacherName
+		data["avatar"] = avatar
+		data["title"] = title
+		data["announcement"] = announcement
+		data["video_url"] = videoUrl
+		data["islive"] = isLive
+	}
 	return data
 }

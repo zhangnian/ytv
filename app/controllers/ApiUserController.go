@@ -24,7 +24,7 @@ func (c ApiUserController) Login() revel.Result {
 
 	userid, err := userService.GetUserId(username, password)
 	if err != nil {
-		return c.RenderError(-1, "登录失败")
+		return c.RenderError(-1, "用户名或密码错误")
 	}
 
 	token, err := userService.RefreshToken(userid)

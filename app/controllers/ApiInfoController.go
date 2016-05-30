@@ -37,7 +37,13 @@ func (c ApiInfoController) Config() revel.Result {
 	return c.RenderOK(data)
 }
 
+// 讲师信息
 func (c ApiInfoController) Teachers() revel.Result {
 	data := infoService.GetTeachers()
+	return c.RenderOK(data)
+}
+
+func (c ApiInfoController) VideoConfig() revel.Result {
+	data := infoService.GetVideoConfig()
 	return c.RenderOK(data)
 }
