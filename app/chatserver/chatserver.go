@@ -23,14 +23,16 @@ func NewServer() *Server {
 }
 
 func (this Server) JoinClient(cli *Client) {
-	// 断开同一个用户的上一个连接
-	for item := this.Clients.Front(); item != nil; item = item.Next() {
-		client := item.Value.(*Client)
-		if client.UserId == cli.UserId {
-			client.Close()
-			break
+	/*
+		// 断开同一个用户的上一个连接
+		for item := this.Clients.Front(); item != nil; item = item.Next() {
+			client := item.Value.(*Client)
+			if client.UserId == cli.UserId {
+				client.Close()
+				break
+			}
 		}
-	}
+	*/
 
 	this.Clients.PushBack(cli)
 }
@@ -38,7 +40,7 @@ func (this Server) JoinClient(cli *Client) {
 func (this Server) RemoveClient(cli *Client) {
 	for item := this.Clients.Front(); item != nil; item = item.Next() {
 		client := item.Value.(*Client)
-		if client.UserId == cli.UserId && client.Conn == cli.Conn {
+		if client.Conn == cli.Conn {
 			this.Clients.Remove(item)
 			break
 		}
@@ -55,6 +57,10 @@ func (this Server) ClientsInfo() []interface{} {
 	for item := this.Clients.Front(); item != nil; item = item.Next() {
 		client := item.Value.(*Client)
 		userinfo := client.UserInfo
+
+		if client.UserId == 0 || userinfo == nil {
+			continue
+		}
 
 		infoMap := make(map[string]interface{})
 		infoMap["userid"] = client.UserId

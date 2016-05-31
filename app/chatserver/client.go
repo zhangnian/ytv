@@ -18,13 +18,18 @@ type Client struct {
 
 // 创建一个在线用户
 func NewClient(userid int, conn *websocket.Conn) *Client {
-	userinfo := userService.GetBasicInfo(userid)
-	if userinfo == nil {
-		revel.ERROR.Printf("查询用户: %d数据失败\n", userid)
-		return nil
+	var client *Client
+	if userid > 0 {
+		userinfo := userService.GetBasicInfo(userid)
+		if userinfo == nil {
+			revel.ERROR.Printf("查询用户: %d数据失败\n", userid)
+			return nil
+		}
+		client = &Client{UserId: userid, Conn: conn, Send: make(chan string, 128), UserInfo: userinfo}
+	} else {
+		client = &Client{UserId: userid, Conn: conn, Send: make(chan string, 128), UserInfo: nil}
 	}
 
-	client := &Client{UserId: userid, Conn: conn, Send: make(chan string, 128), UserInfo: userinfo}
 	return client
 }
 

@@ -92,6 +92,8 @@ func (this InfoService) GetTransactionTips() []interface{} {
 		info["create_time"] = create_time
 		tips = append(tips, info)
 	}
+
+	revel.INFO.Println(len(tips))
 	return tips
 }
 

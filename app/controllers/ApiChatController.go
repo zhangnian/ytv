@@ -36,7 +36,8 @@ func (c ApiChatController) HandleClient(ws *websocket.Conn) revel.Result {
 
 func (c ApiChatController) Total() revel.Result {
 	total := chatServer.TotalOnline()
-	return c.RenderOK(map[string]int{"total": total})
+	members := len(chatServer.ClientsInfo())
+	return c.RenderOK(map[string]int{"total": total, "members": members})
 }
 
 func (c ApiChatController) Users() revel.Result {

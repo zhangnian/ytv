@@ -70,6 +70,7 @@ func (this ChatService) GetHistoryMsg(pageNo int, pageSize int) []interface{} {
 		err = json.Unmarshal([]byte(content), &msg)
 		if err != nil {
 			revel.ERROR.Println("json.Unmarshal error: ", err)
+			revel.ERROR.Println(content)
 			continue
 		}
 

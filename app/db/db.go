@@ -48,6 +48,8 @@ func initDB() {
 
 	connStr := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8", user, passwd, host, port, dbname)
 	dbConn, err := sql.Open("mysql", connStr)
+	dbConn.SetMaxOpenConns(100)
+	dbConn.SetMaxIdleConns(10)
 	if err != nil {
 		revel.ERROR.Printf("连接MySQL失败, 开始重试, error: %s\n", err.Error())
 		retry := 0
@@ -66,6 +68,8 @@ func initDB() {
 	} else {
 		db = dbConn
 	}
+
+	db.Ping()
 }
 
 func initRedis() {
