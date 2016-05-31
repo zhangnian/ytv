@@ -27,7 +27,8 @@ func (this Server) JoinClient(cli *Client) {
 	for item := this.Clients.Front(); item != nil; item = item.Next() {
 		client := item.Value.(*Client)
 		if cli.UserId > 0 && client.UserId == cli.UserId {
-			client.Close()
+			// client.Close()
+			this.Clients.Remove(client)
 			break
 		}
 	}
