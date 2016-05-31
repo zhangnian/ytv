@@ -101,7 +101,11 @@ func (this UserService) GetUserId(username, password string) (int, error) {
 
 func (this UserService) GetCode(telephone string) string {
 	key := fmt.Sprintf("user:code:%s", telephone)
-	val, err := redis.String(db.RedisConn.Do("GET", key))
+
+	redConn := db.RedisPool.Get()
+	defer redConn.Close()
+
+	val, err := redis.String(redConn.Do("GET", key))
 	if err != nil {
 		return ""
 	}
@@ -110,7 +114,11 @@ func (this UserService) GetCode(telephone string) string {
 
 func (this UserService) SaveCode(telephone string, code string) bool {
 	key := fmt.Sprintf("user:code:%s", telephone)
-	_, err := db.RedisConn.Do("SET", key, code, "EX", "300")
+
+	redConn := db.RedisPool.Get()
+	defer redConn.Close()
+
+	_, err := redConn.Do("SET", key, code, "EX", "300")
 	if err != nil {
 		revel.ERROR.Printf("Redis响应失败:%s\n", err.Error())
 		return false
@@ -121,7 +129,11 @@ func (this UserService) SaveCode(telephone string, code string) bool {
 
 func (this UserService) CheckCode(telephone, code string) bool {
 	key := fmt.Sprintf("user:code:%s", telephone)
-	val, err := redis.String(db.RedisConn.Do("GET", key))
+
+	redConn := db.RedisPool.Get()
+	defer redConn.Close()
+
+	val, err := redis.String(redConn.Do("GET", key))
 	if err != nil {
 		return false
 	}
@@ -174,9 +186,11 @@ func (this UserService) CanAccessAPI(userid int, apiUrl string) bool {
 
 func (this UserService) RefreshToken(userid int) (string, error) {
 	token := this.GenToken(userid)
-
 	key := fmt.Sprintf("user:token:%d", userid)
-	_, err := db.RedisConn.Do("SET", key, token)
+
+	redConn := db.RedisPool.Get()
+	defer redConn.Close()
+	_, err := redConn.Do("SET", key, token)
 	if err != nil {
 		revel.ERROR.Printf("保存用户token失败: %s\n", err.Error())
 		return "", err
@@ -194,7 +208,10 @@ func (this UserService) GenToken(userid int) string {
 
 func (this UserService) GetToken(userid int) (string, error) {
 	key := fmt.Sprintf("user:token:%d", userid)
-	val, err := redis.String(db.RedisConn.Do("GET", key))
+	redConn := db.RedisPool.Get()
+	defer redConn.Close()
+
+	val, err := redis.String(redConn.Do("GET", key))
 	if err != nil {
 		return "", err
 	}

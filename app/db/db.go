@@ -15,38 +15,8 @@ const (
 
 var (
 	db        *sql.DB
-	RedisConn redis.Conn
+	RedisPool *redis.Pool
 )
-
-func pingDB() {
-	for {
-		time.Sleep(time.Second * 60)
-
-		err := db.Ping()
-		if err != nil {
-			revel.ERROR.Printf("PING MYSQL失败, error: %s\n", err.Error())
-			break
-		}
-
-	}
-
-	initDB()
-}
-
-func pingRedis() {
-	for {
-		time.Sleep(time.Second * 10)
-		_, err := RedisConn.Do("PING")
-		if err != nil {
-			revel.ERROR.Printf("PING Redis失败, error: %s\n", err.Error())
-			RedisConn.Close()
-			break
-		}
-	}
-
-	// 重连
-	initRedis()
-}
 
 func initDB() {
 	revel.INFO.Println("开始初始化DB连接")
@@ -96,8 +66,6 @@ func initDB() {
 	} else {
 		db = dbConn
 	}
-
-	//go pingDB()
 }
 
 func initRedis() {
@@ -114,24 +82,27 @@ func initRedis() {
 	}
 
 	connStr := fmt.Sprintf("%s:%d", host, port)
-	c, err := redis.Dial("tcp", connStr)
-	if err != nil {
-		revel.ERROR.Printf("连接Redis失败, 开始重试, error: %s\n", err.Error())
-		retry := 0
-		for ; retry < MAX_RETRY; retry++ {
-			c, err := redis.Dial("tcp", connStr)
-			if err == nil {
-				RedisConn = c
-				break
+
+	RedisPool = &redis.Pool{
+		MaxIdle:     50,
+		MaxActive:   500,
+		IdleTimeout: 120 * time.Second,
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			_, err := c.Do("PING")
+			if err != nil {
+				revel.ERROR.Printf("redis TestOnBorrow %v\n", err)
 			}
-			time.Sleep(time.Second * 3)
-		}
-		if retry == MAX_RETRY {
-			revel.ERROR.Println("重连Redis失败，程序退出")
-			panic(err)
-		}
-	} else {
-		RedisConn = c
+			return err
+		},
+		Dial: func() (redis.Conn, error) {
+			c, err := redis.Dial("tcp", connStr)
+			if err != nil {
+				revel.ERROR.Println("连接redis失败, error", err)
+				return nil, err
+			}
+			revel.INFO.Println("连接redis成功")
+			return c, err
+		},
 	}
 
 	//go pingRedis()
