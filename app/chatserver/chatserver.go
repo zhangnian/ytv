@@ -23,16 +23,14 @@ func NewServer() *Server {
 }
 
 func (this Server) JoinClient(cli *Client) {
-	/*
-		// 断开同一个用户的上一个连接
-		for item := this.Clients.Front(); item != nil; item = item.Next() {
-			client := item.Value.(*Client)
-			if client.UserId == cli.UserId {
-				client.Close()
-				break
-			}
+	// 断开同一个用户的上一个连接
+	for item := this.Clients.Front(); item != nil; item = item.Next() {
+		client := item.Value.(*Client)
+		if cli.UserId > 0 && client.UserId == cli.UserId {
+			client.Close()
+			break
 		}
-	*/
+	}
 
 	this.Clients.PushBack(cli)
 }
