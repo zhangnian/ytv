@@ -97,7 +97,7 @@ func initDB() {
 		db = dbConn
 	}
 
-	go pingDB()
+	//go pingDB()
 }
 
 func initRedis() {
@@ -134,7 +134,7 @@ func initRedis() {
 		RedisConn = c
 	}
 
-	go pingRedis()
+	//go pingRedis()
 }
 
 func Init() {
