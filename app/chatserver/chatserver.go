@@ -28,7 +28,7 @@ func (this Server) JoinClient(cli *Client) {
 		client := item.Value.(*Client)
 		if cli.UserId > 0 && client.UserId == cli.UserId {
 			// client.Close()
-			this.Clients.Remove(client)
+			this.Clients.Remove(item)
 			break
 		}
 	}
