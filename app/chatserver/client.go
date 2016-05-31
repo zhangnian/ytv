@@ -11,6 +11,7 @@ import (
 // 一个客户端的websocket连接
 type Client struct {
 	UserId   int
+	IsClosed bool
 	Conn     *websocket.Conn
 	Send     chan string            // 消息发送缓冲区，用于向客户端推送消息
 	UserInfo map[string]interface{} // 用户基本数据
@@ -87,7 +88,7 @@ func (this *Client) storeMessage(userid int, data string, msg string) {
 }
 
 func (this *Client) Close() {
-	if this.Conn == nil {
+	if this.Conn == nil || this.IsClosed {
 		return
 	}
 
@@ -95,4 +96,6 @@ func (this *Client) Close() {
 	if err := this.Conn.Close(); err != nil {
 		revel.ERROR.Printf("关闭用户: %d连接失败, error: %s", this.UserId, err.Error())
 	}
+
+	this.IsClosed = true
 }
