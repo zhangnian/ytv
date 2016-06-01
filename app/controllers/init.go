@@ -6,12 +6,12 @@ import (
 )
 
 var (
-	userService *services.UserService
-	infoService *services.InfoService
-	commService *services.CommService
-	chatService *services.ChatService
-
-	chatServer *chatserver.Server
+	userService    *services.UserService
+	infoService    *services.InfoService
+	commService    *services.CommService
+	chatService    *services.ChatService
+	callingService *services.CallingService
+	chatServer     *chatserver.Server
 )
 
 func InitService() {
@@ -19,6 +19,7 @@ func InitService() {
 	infoService = services.InfoS
 	commService = services.CommS
 	chatService = services.ChatS
+	callingService = services.CallingS
 }
 
 func InitChatServer() {

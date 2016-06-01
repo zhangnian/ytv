@@ -24,3 +24,13 @@ type TransactionTip struct {
 	Content    string
 	CreateTime string
 }
+
+type CallingItem struct {
+	UserId       int
+	Type         string `json:"type"`
+	Positions    int    `json:"positions"`
+	ProductId    int    `json:"product_id"`
+	OpeningPrice int    `json:"opening_price"`
+	StopPrice    int    `json:"stop_price"`
+	LimitedPrice int    `json:"limited_price"`
+}

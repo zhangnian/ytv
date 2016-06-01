@@ -5,10 +5,11 @@ import (
 )
 
 var (
-	UserS *UserService
-	InfoS *InfoService
-	CommS *CommService
-	ChatS *ChatService
+	UserS    *UserService
+	InfoS    *InfoService
+	CommS    *CommService
+	ChatS    *ChatService
+	CallingS *CallingService
 )
 
 func InitService() {
@@ -16,6 +17,7 @@ func InitService() {
 	InfoS = &InfoService{}
 	CommS = &CommService{}
 	ChatS = &ChatService{}
+	CallingS = &CallingService{}
 }
 
 func checkSQLError(err error) {
