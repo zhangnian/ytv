@@ -178,7 +178,7 @@ func (this InfoService) GetVideoConfig() map[string]interface{} {
 }
 
 func (this InfoService) GetVoteList() []interface{} {
-	sql := `SELECT title, options_1, options_2, options_3, options_4, options_5, create_time
+	sql := `SELECT id, title, options_1, options_2, options_3, options_4, options_5, create_time
 			FROM tb_votes WHERE status=0 ORDER BY create_time DESC
 		   `
 	rows, err := db.Query(sql)
@@ -186,13 +186,15 @@ func (this InfoService) GetVoteList() []interface{} {
 
 	data := make([]interface{}, 0)
 	for rows.Next() {
+		var id int
 		var title, options1, options2, options3, options4, options5, createTime string
-		err := rows.Scan(&title, &options1, &options2, &options3, &options4, &options5, &createTime)
+		err := rows.Scan(&id, &title, &options1, &options2, &options3, &options4, &options5, &createTime)
 		if err != nil {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			continue
 		}
 		item := make(map[string]interface{})
+		item["id"] = id
 		item["title"] = title
 		item["options1"] = options1
 		item["options2"] = options2
