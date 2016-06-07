@@ -181,7 +181,7 @@ func (this InfoService) GetVideoConfig() map[string]interface{} {
 
 func (this InfoService) GetVoteList() []interface{} {
 	sql := `SELECT title, options_1, options_2, options_3, options_4, options_5, create_time
-			FROM tb_votes ORDER BY create_time DESC
+			FROM tb_votes WHERE status=0 ORDER BY create_time DESC
 		   `
 	rows, err := db.Query(sql)
 	checkSQLError(err)
@@ -234,4 +234,45 @@ func (this InfoService) Vote(userid int, voteId int, optionsId int) error {
 	}
 
 	return nil
+}
+
+func (this InfoService) GetCallingBillList() []interface{} {
+	sql := `SELECT c.id, userid, product_id, b.name, positions, opening_price, stop_price, 
+			limited_price, sale_price, sale_time, profit, create_time
+			FROM tb_calling_bill c LEFT JOIN tb_bill_type b ON c.type = b.id
+		   `
+
+	rows, err := db.Query(sql)
+	checkSQLError(err)
+
+	data := make([]interface{}, 0)
+	for rows.Next() {
+		var id, userid, productId, positions, openingPrice, stopPrice, limitedPrice, salePrice, profit int
+		var name, saleTime, createTime string
+
+		err := rows.Scan(&id, &userid, &productId, &name, &positions, &openingPrice, &stopPrice, &limitedPrice,
+			&salePrice, &saleTime, &profit, &createTime)
+		if err != nil {
+			revel.ERROR.Printf("rows.Scan error: %s\n", err)
+			continue
+		}
+
+		item := make(map[string]interface{})
+		item["id"] = id
+		item["userid"] = userid
+		item["product_id"] = productId
+		item["name"] = name
+		item["positions"] = positions
+		item["opening_price"] = openingPrice
+		item["stop_price"] = stopPrice
+		item["limited_price"] = limitedPrice
+		item["sale_price"] = salePrice
+		item["sale_time"] = saleTime
+		item["profit"] = profit
+		item["create_time"] = createTime
+
+		data = append(data, item)
+	}
+
+	return data
 }

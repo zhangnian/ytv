@@ -65,3 +65,8 @@ func (c ApiInfoController) Vote() revel.Result {
 	}
 	return c.RenderOK(nil)
 }
+
+func (c ApiInfoController) CallingBillList() revel.Result {
+	data := infoService.GetCallingBillList()
+	return c.RenderOK(data)
+}
