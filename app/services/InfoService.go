@@ -236,10 +236,11 @@ func (this InfoService) Vote(userid int, voteId int, optionsId int) error {
 }
 
 func (this InfoService) GetCallingBillList() []interface{} {
-	sql := `SELECT c.id, userid, product_id, b.name, positions, opening_price, stop_price, 
-			limited_price, sale_price, sale_time, profit, create_time
-			FROM tb_calling_bill c LEFT JOIN tb_bill_type b ON c.type = b.id
-		   `
+	sql := `SELECT c.id, userid, c.product_id, p.name, b.name, positions, opening_price, stop_price, 
+			limited_price, sale_price, sale_time, profit, c.create_time
+			FROM tb_calling_bill c 
+			LEFT JOIN tb_bill_type b ON c.type = b.id
+			LEFT JOIN tb_products p ON c.product_id = p.id`
 
 	rows, err := db.Query(sql)
 	checkSQLError(err)
@@ -247,9 +248,9 @@ func (this InfoService) GetCallingBillList() []interface{} {
 	data := make([]interface{}, 0)
 	for rows.Next() {
 		var id, userid, productId, positions, openingPrice, stopPrice, limitedPrice, salePrice, profit int
-		var name, saleTime, createTime string
+		var name, productName, saleTime, createTime string
 
-		err := rows.Scan(&id, &userid, &productId, &name, &positions, &openingPrice, &stopPrice, &limitedPrice,
+		err := rows.Scan(&id, &userid, &productId, &productName, &name, &positions, &openingPrice, &stopPrice, &limitedPrice,
 			&salePrice, &saleTime, &profit, &createTime)
 		if err != nil {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
@@ -260,6 +261,7 @@ func (this InfoService) GetCallingBillList() []interface{} {
 		item["id"] = id
 		item["userid"] = userid
 		item["product_id"] = productId
+		item["product_name"] = productName
 		item["name"] = name
 		item["positions"] = positions
 		item["opening_price"] = openingPrice
