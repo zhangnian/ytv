@@ -297,6 +297,8 @@ func (this InfoService) GetSharedFileList() []interface{} {
 		item["title"] = title
 		item["filepath"] = filePath
 		item["create_time"] = createTime
+
+		data = append(data, item)
 	}
 
 	return data
