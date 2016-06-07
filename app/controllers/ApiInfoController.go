@@ -70,3 +70,8 @@ func (c ApiInfoController) CallingBillList() revel.Result {
 	data := infoService.GetCallingBillList()
 	return c.RenderOK(data)
 }
+
+func (c ApiInfoController) SharedFileList() revel.Result {
+	data := infoService.GetSharedFileList()
+	return c.RenderOK(data)
+}

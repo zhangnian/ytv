@@ -278,3 +278,26 @@ func (this InfoService) GetCallingBillList() []interface{} {
 
 	return data
 }
+
+func (this InfoService) GetSharedFileList() []interface{} {
+	sql := "SELECT title, filepath, create_time FROM tb_shared_files"
+	rows, err := db.Query(sql)
+	checkSQLError(err)
+
+	data := make([]interface{}, 0)
+	for rows.Next() {
+		var title, filePath, createTime string
+		err := rows.Scan(&title, &filePath, &createTime)
+		if err != nil {
+			revel.ERROR.Printf("rows.Scan error: %s\n", err)
+			continue
+		}
+
+		item := make(map[string]interface{})
+		item["title"] = title
+		item["filepath"] = filePath
+		item["create_time"] = createTime
+	}
+
+	return data
+}
