@@ -1,6 +1,9 @@
 package services
 
 import (
+	"errors"
+	"fmt"
+	"github.com/garyburd/redigo/redis"
 	"github.com/revel/revel"
 	"strings"
 	"ytv/app/db"
@@ -174,4 +177,61 @@ func (this InfoService) GetVideoConfig() map[string]interface{} {
 		data["islive"] = isLive
 	}
 	return data
+}
+
+func (this InfoService) GetVoteList() []interface{} {
+	sql := `SELECT title, options_1, options_2, options_3, options_4, options_5, create_time
+			FROM tb_votes ORDER BY create_time DESC
+		   `
+	rows, err := db.Query(sql)
+	checkSQLError(err)
+
+	data := make([]interface{}, 0)
+	for rows.Next() {
+		var title, options1, options2, options3, options4, options5, createTime string
+		err := rows.Scan(&title, &options1, &options2, &options3, &options4, &options5, &createTime)
+		if err != nil {
+			revel.ERROR.Printf("rows.Scan error: %s\n", err)
+			continue
+		}
+		item := make(map[string]interface{})
+		item["title"] = title
+		item["options1"] = options1
+		item["options2"] = options2
+		item["options3"] = options3
+		item["options4"] = options4
+		item["options5"] = options5
+		item["createTime"] = createTime
+
+		data = append(data, item)
+	}
+
+	return data
+}
+
+func (this InfoService) Vote(userid int, voteId int, optionsId int) error {
+	redConn := db.RedisPool.Get()
+	defer redConn.Close()
+
+	resultKey := fmt.Sprintf("vote:%d:%d", voteId, optionsId)
+	existsKey := fmt.Sprintf("vote:%d", voteId)
+
+	exists, err := redis.Int(redConn.Do("SISMEMBER", existsKey, userid))
+	if exists == 1 {
+		return errors.New("你已投过票了")
+	}
+
+	_, err = redConn.Do("SADD", resultKey, userid)
+	if err != nil {
+		revel.ERROR.Printf("Redis响应失败:%s\n", err.Error())
+		return errors.New("投票失败")
+	}
+
+	_, err = redConn.Do("SADD", existsKey, userid)
+	if err != nil {
+		revel.ERROR.Printf("Redis响应失败:%s\n", err.Error())
+		return errors.New("投票失败")
+	}
+
+	return nil
 }

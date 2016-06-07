@@ -1,9 +1,7 @@
 package controllers
 
 import (
-	"encoding/json"
 	"github.com/revel/revel"
-	"ytv/app/model"
 )
 
 type ApiInfoController struct {
@@ -51,18 +49,19 @@ func (c ApiInfoController) VideoConfig() revel.Result {
 	return c.RenderOK(data)
 }
 
-// 发布喊单
-func (c ApiInfoController) CallingBill() revel.Result {
-	var billInfo model.CallingItem
-	json.NewDecoder(c.Request.Body).Decode(&billInfo)
-
-	billInfo.UserId = c.UserId()
-	callingService.Calling(&billInfo)
-
-	return c.RenderOK(nil)
-
+func (c ApiInfoController) VoteList() revel.Result {
+	data := infoService.GetVoteList()
+	return c.RenderOK(data)
 }
 
-func (c ApiInfoController) BillList() revel.Result {
+func (c ApiInfoController) Vote() revel.Result {
+	var voteId, optionsId int
+	c.Params.Bind(&voteId, "vote_id")
+	c.Params.Bind(&optionsId, "options_id")
 
+	err := infoService.Vote(c.UserId(), voteId, optionsId)
+	if err != nil {
+		return c.RenderError(-1, err.Error())
+	}
+	return c.RenderOK(nil)
 }
