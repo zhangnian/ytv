@@ -151,8 +151,8 @@ func (this InfoService) GetTeachers() []string {
 }
 
 func (this InfoService) GetVideoConfig() map[string]interface{} {
-	sql := `SELECT t.id, t.name, t.avatar, title, announcement, video_url, islive FROM tb_video_config v
-		   LEFT JOIN tb_teachers t ON v.teacher_id = t.id`
+	sql := `SELECT t.id, t.name, title, announcement, video_url, islive FROM tb_video_config v
+		    LEFT JOIN tb_teachers t ON v.teacher_id = t.id`
 
 	rows, err := db.Query(sql)
 	checkSQLError(err)
@@ -160,9 +160,9 @@ func (this InfoService) GetVideoConfig() map[string]interface{} {
 	data := make(map[string]interface{})
 	if rows.Next() {
 		var teacherId, isLive int
-		var teacherName, avatar, title, announcement, videoUrl string
+		var teacherName, title, announcement, videoUrl string
 
-		err := rows.Scan(&teacherId, &teacherName, &avatar, &title, &announcement, &videoUrl, &isLive)
+		err := rows.Scan(&teacherId, &teacherName, &title, &announcement, &videoUrl, &isLive)
 		if err != nil {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			return data
@@ -170,7 +170,6 @@ func (this InfoService) GetVideoConfig() map[string]interface{} {
 
 		data["teacher_id"] = teacherId
 		data["teacher_name"] = teacherName
-		data["avatar"] = avatar
 		data["title"] = title
 		data["announcement"] = announcement
 		data["video_url"] = videoUrl
