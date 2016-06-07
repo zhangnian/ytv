@@ -96,7 +96,6 @@ func (this InfoService) GetTransactionTips() []interface{} {
 		tips = append(tips, info)
 	}
 
-	revel.INFO.Println(len(tips))
 	return tips
 }
 
