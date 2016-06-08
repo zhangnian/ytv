@@ -72,7 +72,7 @@ func (this UserService) Register(info model.RegisterUserInfo) (int, error) {
 
 	// 随机选一张头像
 	sql = `SELECT avatar FROM tb_avatar_pool ORDER BY RAND() LIMIT 0, 1`
-	rows, err := db.Query(sql)
+	rows, err = db.Query(sql)
 	checkSQLError(err)
 	defer rows.Close()
 
@@ -83,7 +83,7 @@ func (this UserService) Register(info model.RegisterUserInfo) (int, error) {
 
 	sql = `INSERT INTO tb_users(username, nickname, telephone, qq, password, agent_id, role_id, avatar, create_time, modify_time, last_time)
 		   VALUES(?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())`
-	rs, err := db.Exec(sql, info.UserName, info.NickName, info.Telephone, info.QQ, info.Password, info.AgentID, USER_TYPE_NORMAL, avatar)
+	rs, err = db.Exec(sql, info.UserName, info.NickName, info.Telephone, info.QQ, info.Password, info.AgentID, USER_TYPE_NORMAL, avatar)
 	checkSQLError(err)
 
 	insertId, err := rs.LastInsertId()
