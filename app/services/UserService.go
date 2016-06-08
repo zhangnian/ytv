@@ -57,8 +57,21 @@ func (this UserService) GetAgent(host string, source string) (agentId int) {
 }
 
 func (this UserService) Register(info model.RegisterUserInfo) (int, error) {
+	sql := "SELECT COUNT(id) FROM username=?"
+	rows, err != db.Query(sql, info.UserName)
+	checkSQLError(err)
+
+	if rows.Next(){
+		var cnt int
+		rows.Scan(&cnt)
+
+		if cnt == 1{
+			return 0, errors.New("用户名已被注册")
+		}
+	}
+	
 	// 随机选一张头像
-	sql := `SELECT avatar FROM tb_avatar_pool ORDER BY RAND() LIMIT 0, 1`
+	sql = `SELECT avatar FROM tb_avatar_pool ORDER BY RAND() LIMIT 0, 1`
 	rows, err := db.Query(sql)
 	checkSQLError(err)
 	defer rows.Close()
