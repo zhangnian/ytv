@@ -37,6 +37,10 @@ func (c ApiUserController) Login() revel.Result {
 		return c.RenderError(-1, "获取用户数据失败")
 	}
 
+	if userinfo["deny"] == 1 {
+		return c.RenderError(-1, "禁止登陆")
+	}
+
 	data := make(map[string]interface{})
 	data["userid"] = userid
 	data["token"] = token

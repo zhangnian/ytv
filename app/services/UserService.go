@@ -230,16 +230,16 @@ func (this UserService) CheckToken(userid int, token string) bool {
 }
 
 func (this UserService) GetBasicInfo(userid int) map[string]interface{} {
-	rows, err := db.Query(`SELECT nickname, email, telephone, qq, level, avatar, agent_id FROM tb_users WHERE id = ?`, userid)
+	rows, err := db.Query(`SELECT nickname, email, telephone, qq, level, avatar, agent_id, deny FROM tb_users WHERE id = ?`, userid)
 	checkSQLError(err)
 	defer rows.Close()
 
 	data := make(map[string]interface{})
 	if rows.Next() {
 		var nickname, email, telephone, qq, avatar string
-		var level, agentId int
+		var level, agentId, deny int
 
-		err := rows.Scan(&nickname, &email, &telephone, &qq, &level, &avatar, &agentId)
+		err := rows.Scan(&nickname, &email, &telephone, &qq, &level, &avatar, &agentId, &deny)
 		if err != nil {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			return nil
@@ -252,6 +252,7 @@ func (this UserService) GetBasicInfo(userid int) map[string]interface{} {
 		data["avatar"] = avatar
 		data["level"] = level
 		data["agentId"] = agentId
+		data["deny"] = deny
 	}
 
 	return data
