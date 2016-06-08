@@ -113,7 +113,7 @@ func (this InfoService) GetAgentConfig(agentId int) map[string]interface{} {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			return agentInfo
 		}
-		qqList := strings.Split(csQQ, "|")
+		qqList := strings.Split(csQQ, " ")
 
 		agentInfo["logo"] = logoUrl
 		agentInfo["qrcode"] = qrCode
