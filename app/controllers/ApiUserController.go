@@ -50,7 +50,12 @@ func (c ApiUserController) Login() revel.Result {
 
 func (c ApiUserController) Register() revel.Result {
 	var info model.RegisterUserInfo
-	json.NewDecoder(c.Request.Body).Decode(&info)
+
+	c.Params.Bind(&info.UserName, "username")
+	c.Params.Bind(&info.NickName, "nickname")
+	c.Params.Bind(&info.Password, "password")
+	c.Params.Bind(&info.QQ, "qq")
+	c.Params.Bind(&info.Telephone, "telephone")
 
 	agentId := userService.GetAgent(c.Host(), c.Source())
 	if agentId <= 0 {
