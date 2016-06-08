@@ -123,3 +123,7 @@ func (c ApiUserController) CheckCode() revel.Result {
 
 	return c.RenderOK(nil)
 }
+
+func (c ApiUserController) HandleOptions() revel.Result {
+	return c.RenderOK(nil)
+}
