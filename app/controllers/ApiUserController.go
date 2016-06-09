@@ -128,6 +128,43 @@ func (c ApiUserController) CheckCode() revel.Result {
 	return c.RenderOK(nil)
 }
 
-func (c ApiUserController) HandleOptions() revel.Result {
-	return c.RenderOK(nil)
+func (c ApiUserController) QQLogin() revel.Result {
+	openid := c.Params.Get("openid")
+	nickname := c.Params.Get("nickname")
+	avatar := c.Params.Get("avatar")
+	revel.INFO.Println(openid, nickname, avatar)
+
+	userid := userService.GetUserIdByOpenId(openid, 1)
+	revel.INFO.Printf("openid: %s, userid: %d\n", openid, userid)
+
+	agentId := userService.GetAgent(c.Host(), c.Source())
+	if agentId <= 0 {
+		return c.RenderError(-1, "获取用户所属分公司失败")
+	}
+
+	data := make(map[string]interface{})
+
+	if userid == 0 {
+		data = userService.ThirdpartyRegister(openid, nickname, avatar, 1, agentId)
+	} else {
+		token, err := userService.RefreshToken(userid)
+		if err != nil {
+			return c.RenderError(-1, "登录失败")
+		}
+
+		userinfo := userService.GetBasicInfo(userid)
+		if userinfo == nil {
+			return c.RenderError(-1, "获取用户数据失败")
+		}
+
+		if userinfo["deny"] == 1 {
+			return c.RenderError(-1, "禁止登陆")
+		}
+
+		data["userid"] = userid
+		data["token"] = token
+		data["basic"] = userinfo
+	}
+
+	return c.RenderOK(data)
 }

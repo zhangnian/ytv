@@ -9,5 +9,3 @@ POST	 /info/vote			    ApiInfoController.Vote
 
 WS       /chat              	ApiChatController.HandleClient
 GET 	 /chat/:action   		ApiChatController.:action
-
-OPTIONS  / 						ApiUserController.HandleOptions

@@ -270,3 +270,58 @@ func (this UserService) GetBasicInfo(userid int) map[string]interface{} {
 
 	return data
 }
+
+func (this UserService) GetUserIdByOpenId(openid string, openType int) int {
+	sql := `SELECT userid FROM tb_thirdparty_users WHERE openid=? AND type=?`
+	rows, err := db.Query(sql, openid, openType)
+	checkSQLError(err)
+
+	userid := 0
+	if rows.Next() {
+		err = rows.Scan(&userid)
+		if err != nil {
+			revel.ERROR.Printf("rows.Scan error: %s\n", err)
+			return 0
+		}
+
+		return userid
+	}
+
+	return userid
+}
+
+func (this UserService) ThirdpartyRegister(openid, nickname, avatar string, openType, agentId int) map[string]interface{} {
+	sql := `INSERT INTO tb_users(username, nickname, agent_id, role_id, avatar, create_time, modify_time, last_time)
+		    VALUES(?, ?, ?, ?, ?, NOW(), NOW(), NOW())`
+	rs, err := db.Exec(sql, nickname, nickname, agentId, USER_TYPE_NORMAL, avatar)
+	checkSQLError(err)
+
+	insertId, err := rs.LastInsertId()
+	if err != nil {
+		revel.ERROR.Printf("DB返回失败: %s\n", err.Error())
+		return nil
+	}
+
+	userid := int(insertId)
+
+	sql = `INSERT INTO tb_thirdparty_users(openid, userid, type, create_time) VALUES(?, ?, ?, NOW())`
+	_, err = db.Exec(sql, openid, userid, 1)
+	checkSQLError(err)
+
+	revel.INFO.Println("新注册用户的userid为: ", userid)
+	token, err := this.RefreshToken(userid)
+	if err != nil {
+		return nil
+	}
+
+	userinfo := this.GetBasicInfo(userid)
+	if userinfo == nil {
+		return nil
+	}
+
+	data := make(map[string]interface{})
+	data["userid"] = userid
+	data["token"] = token
+	data["basic"] = userinfo
+	return data
+}
