@@ -56,12 +56,17 @@ func (this *Client) RecvMessage() {
 }
 
 func (this *Client) handleMessage(msg string) {
+	denyChat := this.UserInfo["denyChat"].(int)
+	if denyChat == 1 {
+		revel.ERROR.Println("用户被禁言")
+		return
+	}
+
 	var rm RoomMessage
 	if err := json.Unmarshal([]byte(msg), &rm); err != nil {
 		revel.ERROR.Printf("消息格式错误, error: %s\n", err.Error())
 		return
 	}
-
 	rm.NickName = this.UserInfo["nickname"].(string)
 	rm.Avatar = this.UserInfo["avatar"].(string)
 	rm.Level = this.UserInfo["level"].(int)

@@ -41,7 +41,14 @@ func (c ApiChatController) HandleClient(ws *websocket.Conn) revel.Result {
 func (c ApiChatController) Total() revel.Result {
 	total := chatServer.TotalOnline()
 	members := len(chatServer.ClientsInfo())
-	return c.RenderOK(map[string]int{"total": total, "members": members})
+
+	denyChat := 1
+	if c.UserId() > 0 {
+		userinfo := userService.GetBasicInfo(c.UserId())
+		denyChat = userinfo["denyChat"].(int)
+	}
+
+	return c.RenderOK(map[string]int{"total": total, "members": members, "deny_chat": denyChat})
 }
 
 func (c ApiChatController) Users() revel.Result {
