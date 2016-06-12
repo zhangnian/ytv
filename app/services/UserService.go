@@ -60,6 +60,7 @@ func (this UserService) Register(info model.RegisterUserInfo) (int, error) {
 	sql := "SELECT COUNT(id) FROM username=?"
 	rows, err := db.Query(sql, info.UserName)
 	checkSQLError(err)
+	defer rows.Close()
 
 	if rows.Next() {
 		var cnt int
@@ -276,6 +277,7 @@ func (this UserService) GetUserIdByOpenId(openid string, openType int) int {
 	sql := `SELECT userid FROM tb_thirdparty_users WHERE openid=? AND type=?`
 	rows, err := db.Query(sql, openid, openType)
 	checkSQLError(err)
+	defer rows.Close()
 
 	userid := 0
 	if rows.Next() {

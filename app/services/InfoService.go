@@ -156,6 +156,7 @@ func (this InfoService) GetVideoConfig() map[string]interface{} {
 
 	rows, err := db.Query(sql)
 	checkSQLError(err)
+	defer rows.Close()
 
 	data := make(map[string]interface{})
 	if rows.Next() {
@@ -184,6 +185,7 @@ func (this InfoService) GetVoteList() []interface{} {
 		   `
 	rows, err := db.Query(sql)
 	checkSQLError(err)
+	defer rows.Close()
 
 	data := make([]interface{}, 0)
 	for rows.Next() {
@@ -246,6 +248,7 @@ func (this InfoService) GetCallingBillList() []interface{} {
 
 	rows, err := db.Query(sql)
 	checkSQLError(err)
+	defer rows.Close()
 
 	data := make([]interface{}, 0)
 	for rows.Next() {
@@ -284,6 +287,7 @@ func (this InfoService) GetSharedFileList() []interface{} {
 	sql := "SELECT title, filepath, create_time FROM tb_shared_files"
 	rows, err := db.Query(sql)
 	checkSQLError(err)
+	defer rows.Close()
 
 	data := make([]interface{}, 0)
 	for rows.Next() {

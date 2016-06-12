@@ -109,7 +109,6 @@ func initRedis() {
 		},
 	}
 
-	//go pingRedis()
 }
 
 func Init() {
