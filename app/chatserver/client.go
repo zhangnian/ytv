@@ -67,6 +67,12 @@ func (this *Client) handleMessage(msg string) {
 		revel.ERROR.Printf("消息格式错误, error: %s\n", err.Error())
 		return
 	}
+
+	if rm.Type == "hb" {
+		// heatbeat msg
+		return
+	}
+
 	rm.NickName = this.UserInfo["nickname"].(string)
 	rm.Avatar = this.UserInfo["avatar"].(string)
 	rm.Level = this.UserInfo["level"].(int)

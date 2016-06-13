@@ -6,6 +6,7 @@ import (
 
 // 房间内群聊消息
 type RoomMessage struct {
+	Type       string `json:"type"`
 	UserId     int    `json:"userid"`
 	NickName   string `json:"nickname"`
 	Avatar     string `json:"avatar"`
