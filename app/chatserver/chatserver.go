@@ -47,7 +47,24 @@ func (this Server) RemoveClient(cli *Client) {
 }
 
 func (this Server) TotalOnline() int {
-	return this.Clients.Len()
+	total := this.Clients.Len()
+
+	sql := `SELECT COUNT(id) FROM tb_robots WHERE HOUR(NOW()) > HOUR(online_time) AND HOUR(NOW()) < HOUR(offline_time) `
+	rows, err := db.Query(sql)
+	if err != nil {
+		return total
+	}
+	defer rows.Close()
+	if rows.Next() {
+		var robotCnt int
+		rows.Scan(&robotCnt)
+
+		if robotCnt > 0 {
+			total = total + robotCnt
+		}
+	}
+
+	return total
 }
 
 func (this Server) ClientsInfo() []interface{} {
