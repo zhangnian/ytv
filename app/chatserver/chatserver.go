@@ -71,7 +71,7 @@ func (this Server) ClientsInfo() []interface{} {
 	}
 
 	// 导入机器人用户
-	sql := `SELECT id, nickname, avatar, level FROM tb_robots`
+	sql := `SELECT id, nickname, avatar, level FROM tb_robots WHERE HOUR(NOW()) > HOUR(online_time) AND HOUR(NOW()) < HOUR(offline_time) `
 	rows, err := db.Query(sql)
 	if err != nil {
 		return clientsInfo
