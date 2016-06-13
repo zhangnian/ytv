@@ -2,6 +2,7 @@ package chatserver
 
 import (
 	"container/list"
+	"ytv/app/db"
 	"ytv/app/services"
 )
 
@@ -52,6 +53,7 @@ func (this Server) TotalOnline() int {
 func (this Server) ClientsInfo() []interface{} {
 	clientsInfo := make([]interface{}, 0)
 
+	// 真实用户
 	for item := this.Clients.Front(); item != nil; item = item.Next() {
 		client := item.Value.(*Client)
 		userinfo := client.UserInfo
@@ -67,6 +69,32 @@ func (this Server) ClientsInfo() []interface{} {
 		infoMap["level"] = userinfo["level"]
 		clientsInfo = append(clientsInfo, infoMap)
 	}
+
+	// 导入机器人用户
+	sql := `SELECT id, nickname, avatar, level FROM tb_robots`
+	rows, err := db.Query(sql)
+	if err != nil {
+		return clientsInfo
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id, level int
+		var nickname, avatar string
+
+		err := rows.Scan(&id, &nickname, &avatar, &level)
+		if err != nil {
+			continue
+		}
+
+		robotInfo := make(map[string]interface{})
+		robotInfo["userid"] = id
+		robotInfo["nickname"] = nickname
+		robotInfo["avatar"] = avatar
+		robotInfo["level"] = level
+		clientsInfo = append(clientsInfo, robotInfo)
+	}
+
 	return clientsInfo
 }
 
