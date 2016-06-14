@@ -42,13 +42,14 @@ func (c ApiChatController) Total() revel.Result {
 	total := chatServer.TotalOnline()
 	members := len(chatServer.ClientsInfo())
 
-	denyChat := 1
+	denyStatus := 0
+	denySec := 0
 	if c.UserId() > 0 {
-		userinfo := userService.GetBasicInfo(c.UserId())
-		denyChat = userinfo["denyChat"].(int)
+		denyStatus = userService.GetDenyStatus(c.UserId())
+		denySec = userService.GetDenyChatSec(c.UserId())
 	}
 
-	return c.RenderOK(map[string]int{"total": total, "members": members, "deny_chat": denyChat})
+	return c.RenderOK(map[string]int{"total": total, "members": members, "deny_chat": denyStatus, "deny_sec": denySec})
 }
 
 func (c ApiChatController) Users() revel.Result {
@@ -77,17 +78,6 @@ func (c ApiChatController) HistoryMsg() revel.Result {
 	data := make(map[string]interface{})
 	data["total"] = chatService.GetMsgCount()
 	data["msg"] = chatService.GetHistoryMsg(pageNo, pageSize)
-
-	return c.RenderOK(data)
-}
-
-func (c ApiChatController) GetDenyStatus() revel.Result {
-	denyStatus := userService.GetDenyStatus(c.UserId())
-	denySec := userService.GetDenyChatSec(c.UserId())
-
-	data := make(map[string]interface{})
-	data["deny_status"] = denyStatus
-	data["deny_sec"] = denySec
 
 	return c.RenderOK(data)
 }
