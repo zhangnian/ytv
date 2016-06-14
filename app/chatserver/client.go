@@ -56,10 +56,14 @@ func (this *Client) RecvMessage() {
 }
 
 func (this *Client) handleMessage(msg string) {
-	denyChat := this.UserInfo["denyChat"].(int)
-	if denyChat == 1 {
-		revel.ERROR.Println("用户被禁言")
+	if this.UserInfo == nil {
 		return
+	} else {
+		denyChat := this.UserInfo["denyChat"].(int)
+		if denyChat == 1 {
+			revel.ERROR.Println("用户被禁言")
+			return
+		}
 	}
 
 	var rm RoomMessage
