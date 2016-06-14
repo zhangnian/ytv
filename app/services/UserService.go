@@ -253,7 +253,7 @@ func (this UserService) CheckToken(userid int, token string) bool {
 		return false
 	}
 
-	revel.INFO.Printf("user token: %s, db token:%s\n", token, dbToken)
+	//revel.INFO.Printf("user token: %s, db token:%s\n", token, dbToken)
 	return dbToken == token
 }
 
@@ -342,4 +342,17 @@ func (this UserService) ThirdpartyRegister(openid, nickname, avatar string, open
 	data["token"] = token
 	data["basic"] = userinfo
 	return data
+}
+
+func (this UserService) GetDenyStatus(userid int) int {
+	sql := `SELECT deny_chat FROM tb_users WHERE id=?`
+	rows, err := db.Query(sql, userid)
+	checkSQLError(err)
+
+	status := 0
+	if rows.Next() {
+		rows.Scan(&status)
+	}
+
+	return status
 }

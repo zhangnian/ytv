@@ -80,3 +80,14 @@ func (c ApiChatController) HistoryMsg() revel.Result {
 
 	return c.RenderOK(data)
 }
+
+func (c ApiChatController) GetDenyStatus() revel.Result {
+	denyStatus := userService.GetDenyStatus(c.UserId())
+	denySec := userService.GetDenyChatSec(c.UserId())
+
+	data := make(map[string]interface{})
+	data["deny_status"] = denyStatus
+	data["deny_sec"] = denySec
+
+	return c.RenderOK(data)
+}
