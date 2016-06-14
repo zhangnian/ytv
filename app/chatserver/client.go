@@ -61,9 +61,15 @@ func (this *Client) handleMessage(msg string) {
 	} else {
 		denyChat := this.UserInfo["denyChat"].(int)
 		if denyChat == 1 {
-			revel.ERROR.Println("用户被禁言")
+			revel.ERROR.Println("用户被永久禁言")
 			return
 		}
+	}
+
+	deny_sec := userService.GetDenyChatSec(this.UserId)
+	if deny_sec > 0 {
+		revel.INFO.Printf("用户还在禁言中，剩余: %ds\n", deny_sec)
+		return
 	}
 
 	var rm RoomMessage

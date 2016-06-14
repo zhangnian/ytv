@@ -113,6 +113,20 @@ func (this UserService) GetUserId(username, password string) (int, error) {
 	return 0, errors.New("无用户数据")
 }
 
+func (this UserService) GetDenyChatSec(userid int) int {
+	key := fmt.Sprintf("deny:chat:%d", userid)
+
+	redConn := db.RedisPool.Get()
+	defer redConn.Close()
+
+	val, err := redis.Int(redConn.Do("TTL", key))
+	if err != nil || val < 0 {
+		return 0
+	}
+
+	return val
+}
+
 func (this UserService) GetCode(telephone string) string {
 	key := fmt.Sprintf("user:code:%s", telephone)
 
@@ -259,6 +273,7 @@ func (this UserService) GetBasicInfo(userid int) map[string]interface{} {
 			return nil
 		}
 
+		data["userid"] = userid
 		data["nickname"] = nickname
 		data["email"] = email
 		data["telphone"] = telephone

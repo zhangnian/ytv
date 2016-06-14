@@ -132,10 +132,8 @@ func (c ApiUserController) QQLogin() revel.Result {
 	openid := c.Params.Get("openid")
 	nickname := c.Params.Get("nickname")
 	avatar := c.Params.Get("avatar")
-	revel.INFO.Println(openid, nickname, avatar)
 
 	userid := userService.GetUserIdByOpenId(openid, 1)
-	revel.INFO.Printf("openid: %s, userid: %d\n", openid, userid)
 
 	agentId := userService.GetAgent(c.Host(), c.Source())
 	if agentId <= 0 {
