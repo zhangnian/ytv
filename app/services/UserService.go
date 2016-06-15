@@ -348,6 +348,7 @@ func (this UserService) GetDenyStatus(userid int) int {
 	sql := `SELECT deny_chat FROM tb_users WHERE id=?`
 	rows, err := db.Query(sql, userid)
 	checkSQLError(err)
+	defer rows.Close()
 
 	status := 0
 	if rows.Next() {
