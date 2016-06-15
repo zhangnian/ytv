@@ -127,7 +127,7 @@ func (this InfoService) GetAgentConfig(agentId int) map[string]interface{} {
 		agentInfo["backgroud"] = bgUrl
 	}
 
-	sql = `SELECT backgroud FROM tb_alerts WHERE id = 1`
+	sql = `SELECT background FROM tb_alerts WHERE id = 1`
 	rows2, err := db.Query(sql)
 	checkSQLError(err)
 	defer rows2.Close()
