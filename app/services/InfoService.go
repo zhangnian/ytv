@@ -103,6 +103,7 @@ func (this InfoService) GetAgentConfig(agentId int) map[string]interface{} {
 	sql := `SELECT logo_url, qr_code, cs_qq, share_qrcode, help_url, support_url, website_url, download_url, cs_telephone, bg_url FROM tb_agents WHERE id = ?`
 	rows, err := db.Query(sql, agentId)
 	checkSQLError(err)
+	defer rows.Close()
 
 	agentInfo := make(map[string]interface{})
 	if rows.Next() {
@@ -125,17 +126,16 @@ func (this InfoService) GetAgentConfig(agentId int) map[string]interface{} {
 		agentInfo["cs_telephone"] = csTelephone
 		agentInfo["backgroud"] = bgUrl
 	}
-	rows.Close()
 
 	sql = `SELECT backgroud FROM tb_alerts WHERE id = 1`
-	rows, err = db.Query(sql)
+	rows2, err := db.Query(sql)
 	checkSQLError(err)
+	defer rows2.Close()
 
 	var alertBg string
-	if rows.Next() {
-		rows.Scan(&alertBg)
+	if rows2.Next() {
+		rows2.Scan(&alertBg)
 	}
-	rows.Close()
 
 	agentInfo["alert_backgroud"] = alertBg
 
