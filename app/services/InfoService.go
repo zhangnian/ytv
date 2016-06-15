@@ -127,6 +127,17 @@ func (this InfoService) GetAgentConfig(agentId int) map[string]interface{} {
 		agentInfo["backgroud"] = bgUrl
 	}
 
+	sql = `SELECT backgroud FROM tb_alerts WHERE id = 1`
+	rows, err = db.Query(sql)
+	checkSQLError(err)
+
+	var alertBg string
+	if rows.Next() {
+		rows.Scan(&alertBg)
+	}
+
+	agentInfo["alert_backgroud"] = alertBg
+
 	return agentInfo
 }
 

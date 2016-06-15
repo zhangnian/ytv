@@ -49,7 +49,7 @@ func (this Server) RemoveClient(cli *Client) {
 func (this Server) TotalOnline() int {
 	total := this.Clients.Len()
 
-	sql := `SELECT COUNT(id) FROM tb_robots WHERE HOUR(NOW()) > HOUR(online_time) AND HOUR(NOW()) < HOUR(offline_time) `
+	sql := `SELECT COUNT(id) FROM tb_robots WHERE HOUR(NOW()) > HOUR(online_time) AND HOUR(NOW()) < HOUR(offline_time)`
 	rows, err := db.Query(sql)
 	if err != nil {
 		return total
