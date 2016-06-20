@@ -176,3 +176,24 @@ func (c ApiUserController) ModifyPassword() revel.Result {
 
 	return c.RenderOK(nil)
 }
+
+func (c ApiUserController) Info() revel.Result {
+	data := userService.GetBasicInfo(c.UserId())
+	if data == nil {
+		return c.RenderError(-1, "获取用户数据失败")
+	}
+	return c.RenderOK(data)
+}
+
+func (c ApiUserController) ModifyInfo() revel.Result {
+	nickname := c.Params.Get("nickname")
+	qq := c.Params.Get("qq")
+	telephone := c.Params.Get("telephone")
+	email := c.Params.Get("email")
+
+	if !userService.ModifyInfo(c.UserId(), nickname, qq, telephone, email) {
+		return c.RenderError(-1, "修改密码失败")
+	}
+
+	return c.RenderOK(nil)
+}

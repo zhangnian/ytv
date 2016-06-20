@@ -365,3 +365,11 @@ func (this UserService) ModifyPassword(userid int, newPasswd string) bool {
 
 	return true
 }
+
+func (this UserService) ModifyInfo(userid int, nickname, qq, telephone, email string) bool {
+	sql := `UPDATE tb_users SET nickname=?, qq=?, email=?, telephone=? WHERE id=?`
+	_, err := db.Exec(sql, nickname, qq, telephone, email, userid)
+	checkSQLError(err)
+
+	return true
+}
