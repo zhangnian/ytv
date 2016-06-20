@@ -357,3 +357,11 @@ func (this UserService) GetDenyStatus(userid int) int {
 
 	return status
 }
+
+func (this UserService) ModifyPassword(userid int, newPasswd string) bool {
+	sql := `UPDATE tb_users SET password=? WHERE id=?`
+	_, err := db.Exec(sql, newPasswd, userid)
+	checkSQLError(err)
+
+	return true
+}

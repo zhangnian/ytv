@@ -166,3 +166,13 @@ func (c ApiUserController) QQLogin() revel.Result {
 
 	return c.RenderOK(data)
 }
+
+func (c ApiUserController) ModifyPassword() revel.Result {
+	newPasswd := c.Params.Get("password")
+
+	if !userService.ModifyPassword(c.UserId(), newPasswd) {
+		return c.RenderError(-1, "修改密码失败")
+	}
+
+	return c.RenderOK(nil)
+}
