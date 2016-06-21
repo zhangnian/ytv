@@ -57,7 +57,7 @@ func (this UserService) GetAgent(host string, source string) (agentId int) {
 }
 
 func (this UserService) Register(info model.RegisterUserInfo) (int, error) {
-	sql := "SELECT COUNT(id) FROM username=?"
+	sql := "SELECT COUNT(id) FROM tb_users WHERE username=?"
 	rows, err := db.Query(sql, info.UserName)
 	checkSQLError(err)
 	defer rows.Close()
