@@ -22,6 +22,9 @@ type UserService struct {
 }
 
 func (this UserService) GetAgent(host string, source string) (agentId int) {
+	//  默认总公司
+	agentId = 1
+
 	if len(host) > 0 {
 		revel.INFO.Println("根据host查询, host: ", host)
 		sql := `SELECT id FROM tb_agents WHERE host_key = ?`
@@ -51,8 +54,6 @@ func (this UserService) GetAgent(host string, source string) (agentId int) {
 			}
 		}
 	}
-
-	agentId = 0
 	return
 }
 
