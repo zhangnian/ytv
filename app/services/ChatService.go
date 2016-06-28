@@ -104,7 +104,10 @@ func (this ChatService) FilterDirtyWords(content string) (newContent string) {
 			continue
 		}
 
-		newContent = strings.Replace(content, dirtyWord, "*", -1)
+		if len(dirtyWord) > 0 {
+			newContent = strings.Replace(newContent, dirtyWord, "*", -1)
+		}
+
 	}
 
 	return
