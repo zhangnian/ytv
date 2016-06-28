@@ -5,6 +5,7 @@ import (
 	"ytv/app/db"
 
 	"encoding/json"
+	"strings"
 )
 
 type ChatService struct {
@@ -92,7 +93,7 @@ func (this ChatService) FilterDirtyWords(content string) (newContent string) {
 	newContent = content
 
 	sql := `SELECT words FROM tb_dirty_words`
-	rows, err := db.Exec(sql)
+	rows, err := db.Query(sql)
 	checkSQLError(err)
 
 	for rows.Next() {
