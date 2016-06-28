@@ -6,6 +6,7 @@ GET		 /info/:action      	ApiInfoController.:action
 
 POST     /user/register    	 	ApiUserController.Register
 POST	 /info/vote			    ApiInfoController.Vote
+POST     /chat/sendmanagermsg   ApiChatController.SendManagerMsg
 
 WS       /chat              	ApiChatController.HandleClient
 GET 	 /chat/:action   		ApiChatController.:action

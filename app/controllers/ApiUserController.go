@@ -56,12 +56,13 @@ func (c ApiUserController) Register() revel.Result {
 	c.Params.Bind(&info.QQ, "qq")
 	c.Params.Bind(&info.Telephone, "telephone")
 
-	agentId := userService.GetAgent(c.Host(), c.Source())
-	if agentId <= 0 {
-		return c.RenderError(-1, "获取用户所属分公司失败")
+	managerId := userService.GetAgent(c.Host(), c.Source())
+	if managerId <= 0 {
+		return c.RenderError(-1, "获取用户所属客户经理失败")
 	}
 
-	info.AgentID = agentId
+	info.ManagerId = managerId
+	info.CompanyId = userService.GetCompanyId(managerId)
 
 	userid, err := userService.Register(info)
 	if err != nil {
@@ -135,15 +136,17 @@ func (c ApiUserController) QQLogin() revel.Result {
 
 	userid := userService.GetUserIdByOpenId(openid, 1)
 
-	agentId := userService.GetAgent(c.Host(), c.Source())
-	if agentId <= 0 {
-		return c.RenderError(-1, "获取用户所属分公司失败")
+	managerId := userService.GetAgent(c.Host(), c.Source())
+	if managerId <= 0 {
+		return c.RenderError(-1, "获取用户所属客户经理失败")
 	}
+
+	companyId := userService.GetCompanyId(managerId)
 
 	data := make(map[string]interface{})
 
 	if userid == 0 {
-		data = userService.ThirdpartyRegister(openid, nickname, avatar, 1, agentId)
+		data = userService.ThirdpartyRegister(openid, nickname, avatar, 1, managerId, companyId)
 	} else {
 		token, err := userService.RefreshToken(userid)
 		if err != nil {

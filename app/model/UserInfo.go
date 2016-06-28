@@ -6,7 +6,8 @@ type RegisterUserInfo struct {
 	Password  string `json:"password"`
 	QQ        string `json:"qq"`
 	Telephone string `json:"telephone"`
-	AgentID   int
+	ManagerId int
+	CompanyId int
 }
 
 type BasicUserInfo struct {
@@ -16,5 +17,6 @@ type BasicUserInfo struct {
 	QQ        string
 	Level     int
 	Avatar    string
-	AgentId   int
+	ManagerId int
+	CompanyId int
 }

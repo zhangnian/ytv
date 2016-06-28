@@ -28,11 +28,21 @@ func (c ApiInfoController) TransactionTips() revel.Result {
 
 // 分公司配置数据
 func (c ApiInfoController) Config() revel.Result {
-	agentId := userService.GetAgent(c.Host(), c.Source())
-	if agentId <= 0 {
-		return c.RenderError(-1, "获取用户所属分公司失败")
+	var agentId int
+	if c.UserId() > 0 {
+		userinfo := userService.GetBasicInfo(c.UserId())
+		agentId = userinfo["agentId"].(int)
+	} else {
+		managerId := userService.GetAgent(c.Host(), c.Source())
+		if managerId <= 0 {
+			return c.RenderError(-1, "获取用户所属客户经理失败")
+		}
+		agentId = userService.GetCompanyId(managerId)
 	}
 
+	if agentId == 0 {
+		agentId = 1
+	}
 	data := infoService.GetAgentConfig(agentId)
 	return c.RenderOK(data)
 }

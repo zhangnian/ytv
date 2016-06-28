@@ -26,8 +26,20 @@ func (c ApiBaseController) Host() string {
 	return c.Request.Host
 }
 
-func (c ApiBaseController) Source() string {
-	return c.Params.Get("source")
+func (c ApiBaseController) Source() map[string]int {
+	var companyId, departmentId, teamId, managerId int
+	c.Params.Bind(&companyId, "c")
+	c.Params.Bind(&departmentId, "d")
+	c.Params.Bind(&teamId, "t")
+	c.Params.Bind(&managerId, "m")
+
+	data := make(map[string]int)
+	data["companyId"] = companyId
+	data["departmentId"] = departmentId
+	data["teamId"] = teamId
+	data["managerId"] = managerId
+
+	return data
 }
 
 func (c ApiBaseController) RenderOK(data interface{}) revel.Result {

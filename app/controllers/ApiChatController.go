@@ -47,6 +47,8 @@ func (c ApiChatController) Total() revel.Result {
 	if c.UserId() > 0 {
 		denyStatus = userService.GetDenyStatus(c.UserId())
 		denySec = userService.GetDenyChatSec(c.UserId())
+
+		userService.AddOnlineTimes(c.UserId())
 	}
 
 	return c.RenderOK(map[string]int{"total": total, "members": members, "deny_chat": denyStatus, "deny_sec": denySec})
@@ -80,4 +82,20 @@ func (c ApiChatController) HistoryMsg() revel.Result {
 	data["msg"] = chatService.GetHistoryMsg(pageNo, pageSize)
 
 	return c.RenderOK(data)
+}
+
+func (c ApiChatController) SendManagerMsg() revel.Result {
+	var content string
+	var managerId int
+
+	c.Params.Bind(&content, "content")
+	c.Params.Bind(&managerId, "managerId")
+
+	if c.UserId() > 0 && managerId > 0 {
+		if !chatService.SendManagerMsg(c.UserId(), managerId, content) {
+			return c.RenderError(-1, "发送消息失败")
+		}
+	}
+
+	return c.RenderOK(nil)
 }

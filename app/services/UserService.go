@@ -21,39 +21,96 @@ const (
 type UserService struct {
 }
 
-func (this UserService) GetAgent(host string, source string) (agentId int) {
-	//  默认总公司
-	agentId = 1
+func (this UserService) GetCompanyId(managerId int) int {
+	sql := `SELECT agent_id FROM tb_admin WHERE id = ?`
+	rows, err := db.Query(sql, managerId)
+	checkSQLError(err)
 
+	companyId := 1
+
+	if rows.Next() {
+		err = rows.Scan(&companyId)
+		if err != nil {
+			revel.ERROR.Println("rows.Scan error")
+			companyId = 1
+		}
+	}
+
+	return companyId
+}
+
+func (this UserService) GetAgent(host string, source map[string]int) (managerId int) {
+	managerId, ok := source["managerId"]
+	if ok && managerId > 0 {
+		revel.INFO.Println("用户已指定客户经理, managerId: ", managerId)
+		return
+	}
+
+	teamId, ok := source["teamId"]
+	if ok && teamId > 0 {
+		sql := `SELECT id FROM tb_admin WHERE group_id = 4 AND team_id = ? ORDER BY RAND() LIMIT 0, 1`
+		rows, err := db.Query(sql, teamId)
+		checkSQLError(err)
+		defer rows.Close()
+
+		if rows.Next() {
+			err := rows.Scan(&managerId)
+			if err == nil && managerId > 0 {
+				revel.INFO.Printf("用户已指定团队，teamId: %d, managerId: %d\n", teamId, managerId)
+				return
+			}
+		}
+	}
+
+	departmentId, ok := source["departmentId"]
+	if ok && departmentId > 0 {
+		sql := `SELECT id FROM tb_admin WHERE group_id =4 AND team_id IN (SELECT id FROM tb_teams WHERE department_id = ?) ORDER BY RAND() LIMIT 0, 1`
+		rows, err := db.Query(sql, departmentId)
+		checkSQLError(err)
+		defer rows.Close()
+		if rows.Next() {
+			err := rows.Scan(&managerId)
+			if err == nil && managerId > 0 {
+				revel.INFO.Printf("用户已指定部门，departmentId: %d, managerId: %d\n", departmentId, managerId)
+				return
+			}
+		}
+	}
+
+	var companyId int
 	if len(host) > 0 {
-		revel.INFO.Println("根据host查询, host: ", host)
 		sql := `SELECT id FROM tb_agents WHERE host_key = ?`
 		rows, err := db.Query(sql, host)
 		checkSQLError(err)
 		defer rows.Close()
 
 		if rows.Next() {
-			err := rows.Scan(&agentId)
-			if err == nil && agentId > 0 {
-				return
+			err := rows.Scan(&companyId)
+			if err != nil {
+				revel.ERROR.Println("rows.Scan error")
 			}
 		}
 	}
+	revel.INFO.Printf("根据host查询, host: %s, companyId: %d", host, companyId)
 
-	if len(source) > 0 {
-		revel.INFO.Println("根据source查询, source: ", source)
-		sql := `SELECT id FROM tb_agents WHERE query_key = ?`
-		rows, err := db.Query(sql, source)
-		checkSQLError(err)
-		defer rows.Close()
+	companyId = source["companyId"]
+	if companyId == 0 {
+		companyId = 1
+	}
 
-		if rows.Next() {
-			err := rows.Scan(&agentId)
-			if err == nil && agentId > 0 {
-				return
-			}
+	sql := `SELECT id FROM tb_admin WHERE group_id =4 AND team_id IN (SELECT id FROM tb_teams WHERE company_id = ?) ORDER BY RAND() LIMIT 0, 1`
+	rows, err := db.Query(sql, companyId)
+	checkSQLError(err)
+	defer rows.Close()
+	if rows.Next() {
+		err := rows.Scan(&managerId)
+		if err == nil && managerId > 0 {
+			revel.INFO.Printf("用户已指定公司，companyId: %d, managerId: %d\n", companyId, managerId)
+			return
 		}
 	}
+
+	managerId = 1
 	return
 }
 
@@ -83,9 +140,9 @@ func (this UserService) Register(info model.RegisterUserInfo) (int, error) {
 		rows.Scan(&avatar)
 	}
 
-	sql = `INSERT INTO tb_users(username, nickname, telephone, qq, password, agent_id, role_id, avatar, create_time, modify_time, last_time)
+	sql = `INSERT INTO tb_users(username, nickname, telephone, qq, password, manager_id, role_id, avatar, create_time, modify_time, last_time)
 		   VALUES(?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW(), NOW())`
-	rs, err := db.Exec(sql, info.UserName, info.NickName, info.Telephone, info.QQ, info.Password, info.AgentID, USER_TYPE_NORMAL, avatar)
+	rs, err := db.Exec(sql, info.UserName, info.NickName, info.Telephone, info.QQ, info.Password, info.ManagerId, USER_TYPE_NORMAL, avatar)
 	checkSQLError(err)
 
 	insertId, err := rs.LastInsertId()
@@ -259,16 +316,16 @@ func (this UserService) CheckToken(userid int, token string) bool {
 }
 
 func (this UserService) GetBasicInfo(userid int) map[string]interface{} {
-	rows, err := db.Query(`SELECT nickname, email, telephone, qq, level, avatar, agent_id, deny, deny_chat FROM tb_users WHERE id = ?`, userid)
+	rows, err := db.Query(`SELECT nickname, email, telephone, qq, level, avatar, agent_id, manager_id, deny, deny_chat FROM tb_users WHERE id = ?`, userid)
 	checkSQLError(err)
 	defer rows.Close()
 
 	data := make(map[string]interface{})
 	if rows.Next() {
 		var nickname, email, telephone, qq, avatar string
-		var level, agentId, deny, denyChat int
+		var level, agentId, managerId, deny, denyChat int
 
-		err := rows.Scan(&nickname, &email, &telephone, &qq, &level, &avatar, &agentId, &deny, &denyChat)
+		err := rows.Scan(&nickname, &email, &telephone, &qq, &level, &avatar, &agentId, &managerId, &deny, &denyChat)
 		if err != nil {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			return nil
@@ -281,6 +338,7 @@ func (this UserService) GetBasicInfo(userid int) map[string]interface{} {
 		data["qq"] = qq
 		data["avatar"] = avatar
 		data["level"] = level
+		data["managerId"] = managerId
 		data["agentId"] = agentId
 		data["deny"] = deny
 		data["denyChat"] = denyChat
@@ -309,10 +367,10 @@ func (this UserService) GetUserIdByOpenId(openid string, openType int) int {
 	return userid
 }
 
-func (this UserService) ThirdpartyRegister(openid, nickname, avatar string, openType, agentId int) map[string]interface{} {
-	sql := `INSERT INTO tb_users(username, nickname, agent_id, role_id, avatar, create_time, modify_time, last_time)
+func (this UserService) ThirdpartyRegister(openid, nickname, avatar string, openType, managerId int, companyId int) map[string]interface{} {
+	sql := `INSERT INTO tb_users(username, nickname, manager_id, agent_id, role_id, avatar, create_time, modify_time, last_time)
 		    VALUES(?, ?, ?, ?, ?, NOW(), NOW(), NOW())`
-	rs, err := db.Exec(sql, nickname, nickname, agentId, USER_TYPE_NORMAL, avatar)
+	rs, err := db.Exec(sql, nickname, nickname, managerId, companyId, USER_TYPE_NORMAL, avatar)
 	checkSQLError(err)
 
 	insertId, err := rs.LastInsertId()
@@ -370,6 +428,14 @@ func (this UserService) ModifyPassword(userid int, newPasswd string) bool {
 func (this UserService) ModifyInfo(userid int, nickname, qq, telephone, email string) bool {
 	sql := `UPDATE tb_users SET nickname=?, qq=?, email=?, telephone=? WHERE id=?`
 	_, err := db.Exec(sql, nickname, qq, email, telephone, userid)
+	checkSQLError(err)
+
+	return true
+}
+
+func (this UserService) AddOnlineTimes(userid int) bool {
+	sql := `UPDATE tb_users SET online_times=online_times+1, online_time=NOW() WHERE id=?`
+	_, err := db.Exec(sql, userid)
 	checkSQLError(err)
 
 	return true

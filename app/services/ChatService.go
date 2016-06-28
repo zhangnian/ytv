@@ -79,3 +79,11 @@ func (this ChatService) GetHistoryMsg(pageNo int, pageSize int) []interface{} {
 
 	return msgList
 }
+
+func (this ChatService) SendManagerMsg(userid int, managerId int, content string) bool {
+	sql := `INSERT INTO tb_chat_manager(userid, manager_id, content, create_time) VALUES(?, ?, ?, NOW())`
+	_, err := db.Exec(sql, userid, managerId, content)
+	checkSQLError(err)
+
+	return true
+}
