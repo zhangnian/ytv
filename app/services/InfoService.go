@@ -100,7 +100,7 @@ func (this InfoService) GetTransactionTips() []interface{} {
 }
 
 func (this InfoService) GetAgentConfig(agentId int) map[string]interface{} {
-	sql := `SELECT logo_url, qr_code, cs_qq, share_qrcode, help_url, support_url, website_url, download_url, cs_telephone, bg_url FROM tb_agents WHERE id = ?`
+	sql := `SELECT logo_url, qr_code, cs_qq, share_qrcode, help_url, support_url, website_url, download_url, cs_telephone, bg_url, unreg_watchtime, unreg_alerttime FROM tb_agents WHERE id = ?`
 	rows, err := db.Query(sql, agentId)
 	checkSQLError(err)
 	defer rows.Close()
@@ -108,7 +108,8 @@ func (this InfoService) GetAgentConfig(agentId int) map[string]interface{} {
 	agentInfo := make(map[string]interface{})
 	if rows.Next() {
 		var logoUrl, qrCode, csQQ, shareQRCode, helpUrl, supportUrl, websiteUrl, downloadUrl, csTelephone, bgUrl string
-		err := rows.Scan(&logoUrl, &qrCode, &csQQ, &shareQRCode, &helpUrl, &supportUrl, &websiteUrl, &downloadUrl, &csTelephone, &bgUrl)
+		var unreg_watchtime, unreg_alerttime int
+		err := rows.Scan(&logoUrl, &qrCode, &csQQ, &shareQRCode, &helpUrl, &supportUrl, &websiteUrl, &downloadUrl, &csTelephone, &bgUrl, &unreg_watchtime, &unreg_alerttime)
 		if err != nil {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			return agentInfo
@@ -125,6 +126,8 @@ func (this InfoService) GetAgentConfig(agentId int) map[string]interface{} {
 		agentInfo["download_url"] = downloadUrl
 		agentInfo["cs_telephone"] = csTelephone
 		agentInfo["backgroud"] = bgUrl
+		agentInfo["unreg_watchtime"] = unreg_watchtime
+		agentInfo["unreg_alerttime"] = unreg_alerttime
 	}
 
 	sql = `SELECT background FROM tb_alerts WHERE id = 1`
