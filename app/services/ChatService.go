@@ -87,3 +87,24 @@ func (this ChatService) SendManagerMsg(userid int, managerId int, content string
 
 	return true
 }
+
+func (this ChatService) FilterDirtyWords(content string) (newContent string) {
+	newContent = content
+
+	sql := `SELECT words FROM tb_dirty_words`
+	rows, err := db.Exec(sql)
+	checkSQLError(err)
+
+	for rows.Next() {
+		var dirtyWord string
+		err = rows.Scan(&dirtyWord)
+		if err != nil {
+			revel.ERROR.Println("rows.Scan error")
+			continue
+		}
+
+		newContent = strings.Replace(content, dirtyWord, "*", -1)
+	}
+
+	return
+}

@@ -17,4 +17,5 @@ type RoomMessage struct {
 
 var (
 	userService *services.UserService
+	chatService *services.ChatService
 )

@@ -83,6 +83,7 @@ func (this *Client) handleMessage(msg string) {
 		return
 	}
 
+	rm.Content = chatService.FilterDirtyWords(rm.Content)
 	rm.NickName = this.UserInfo["nickname"].(string)
 	rm.Avatar = this.UserInfo["avatar"].(string)
 	rm.Level = this.UserInfo["level"].(int)

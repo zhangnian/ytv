@@ -18,6 +18,7 @@ type Server struct {
 func NewServer() *Server {
 	Broadcast = make(chan string)
 	userService = services.UserS
+	chatService = services.ChatS
 
 	svr := &Server{Name: "webchat", Clients: list.New()}
 	return svr
