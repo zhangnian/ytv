@@ -102,3 +102,19 @@ func (c ApiInfoController) SharedFileList() revel.Result {
 	data := infoService.GetSharedFileList()
 	return c.RenderOK(data)
 }
+
+func (c ApiInfoController) BackgroudImgs() revel.Result {
+	data := infoService.GetBackgroudImgs()
+	return c.RenderOK(data)
+}
+
+func (c ApiInfoController) SaveBackgroudImgs() revel.Result {
+	var imgId int
+	c.Params.Bind(&imgId, "imgId")
+
+	if c.UserId() > 0 {
+		infoService.SaveBackgroudImg(c.UserId(), imgId)
+	}
+
+	return c.RenderOK(nil)
+}

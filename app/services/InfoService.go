@@ -346,3 +346,35 @@ func (this InfoService) GetDenyIpStatus(ip string) (isDeny bool) {
 
 	return
 }
+
+func (this InfoService) GetBackgroudImgs() []map[string]interface{} {
+	sql := `SELECT id, img_url FROM tb_backgroud_imgs ORDER BY id DESC`
+	rows, err := db.Query(sql)
+	checkSQLError(err)
+
+	data := make([]map[string]interface{}, 0)
+	for rows.Next() {
+		var id int
+		var imgUrl string
+		err = rows.Scan(&id, &imgUrl)
+		if err != nil {
+			continue
+		}
+
+		item := make(map[string]interface{})
+		item["id"] = id
+		item["url"] = imgUrl
+
+		data = append(data, item)
+	}
+
+	return data
+}
+
+func (this InfoService) SaveBackgroudImg(userid, imgId int) bool {
+	sql := `UPDATE tb_users SET backgroud_img=? WHERE id=?`
+	_, err := db.Exec(sql, imgId, userid)
+	checkSQLError(err)
+
+	return true
+}

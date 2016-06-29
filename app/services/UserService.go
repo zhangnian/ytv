@@ -317,16 +317,16 @@ func (this UserService) CheckToken(userid int, token string) bool {
 }
 
 func (this UserService) GetBasicInfo(userid int) map[string]interface{} {
-	rows, err := db.Query(`SELECT nickname, email, telephone, qq, level, avatar, agent_id, manager_id, deny, deny_chat FROM tb_users WHERE id = ?`, userid)
+	rows, err := db.Query(`SELECT nickname, email, telephone, qq, level, avatar, agent_id, manager_id, deny, deny_chat, backgroud_img FROM tb_users WHERE id = ?`, userid)
 	checkSQLError(err)
 	defer rows.Close()
 
 	data := make(map[string]interface{})
 	if rows.Next() {
 		var nickname, email, telephone, qq, avatar string
-		var level, agentId, managerId, deny, denyChat int
+		var level, agentId, managerId, deny, denyChat, backgroudImg int
 
-		err := rows.Scan(&nickname, &email, &telephone, &qq, &level, &avatar, &agentId, &managerId, &deny, &denyChat)
+		err := rows.Scan(&nickname, &email, &telephone, &qq, &level, &avatar, &agentId, &managerId, &deny, &denyChat, &backgroudImg)
 		if err != nil {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			return nil
@@ -343,6 +343,7 @@ func (this UserService) GetBasicInfo(userid int) map[string]interface{} {
 		data["agentId"] = agentId
 		data["deny"] = deny
 		data["denyChat"] = denyChat
+		data["backgroudImg"] = backgroudImg
 	}
 
 	return data
