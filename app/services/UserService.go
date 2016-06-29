@@ -25,6 +25,7 @@ func (this UserService) GetCompanyId(managerId int) int {
 	sql := `SELECT agent_id FROM tb_admin WHERE id = ?`
 	rows, err := db.Query(sql, managerId)
 	checkSQLError(err)
+	defer rows.Close()
 
 	companyId := 1
 

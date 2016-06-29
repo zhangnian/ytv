@@ -82,7 +82,7 @@ func (this ChatService) GetHistoryMsg(pageNo int, pageSize int) []interface{} {
 }
 
 func (this ChatService) SendManagerMsg(userid int, managerId int, content string) bool {
-	sql := `INSERT INTO tb_chat_manager(userid, manager_id, content, create_time) VALUES(?, ?, ?, NOW())`
+	sql := `INSERT INTO tb_chat_manager(sender_uid, recver_uid, content, create_time) VALUES(?, ?, ?, NOW())`
 	_, err := db.Exec(sql, userid, managerId, content)
 	checkSQLError(err)
 
@@ -95,6 +95,7 @@ func (this ChatService) FilterDirtyWords(content string) (newContent string) {
 	sql := `SELECT words FROM tb_dirty_words`
 	rows, err := db.Query(sql)
 	checkSQLError(err)
+	defer rows.Close()
 
 	for rows.Next() {
 		var dirtyWord string
