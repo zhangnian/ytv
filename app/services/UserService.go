@@ -434,9 +434,9 @@ func (this UserService) ModifyInfo(userid int, nickname, qq, telephone, email st
 	return true
 }
 
-func (this UserService) AddOnlineTimes(userid int) bool {
-	sql := `UPDATE tb_users SET online_times=online_times+1, online_time=NOW() WHERE id=?`
-	_, err := db.Exec(sql, userid)
+func (this UserService) AddOnlineTimes(userid int, clientIp string) bool {
+	sql := `UPDATE tb_users SET online_times=online_times+1, online_time=NOW(), last_ip=? WHERE id=?`
+	_, err := db.Exec(sql, clientIp, userid)
 	checkSQLError(err)
 
 	return true

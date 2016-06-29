@@ -48,7 +48,8 @@ func (c ApiChatController) Total() revel.Result {
 		denyStatus = userService.GetDenyStatus(c.UserId())
 		denySec = userService.GetDenyChatSec(c.UserId())
 
-		userService.AddOnlineTimes(c.UserId())
+		clientIp := c.Request.Header.Get("X-Forwarded-For")
+		userService.AddOnlineTimes(c.UserId(), clientIp)
 	}
 
 	return c.RenderOK(map[string]int{"total": total, "members": members, "deny_chat": denyStatus, "deny_sec": denySec})
