@@ -28,6 +28,14 @@ func (c ApiInfoController) TransactionTips() revel.Result {
 
 // 分公司配置数据
 func (c ApiInfoController) Config() revel.Result {
+	clientIp := c.Request.Header.Get("X-Forwarded-For")
+	revel.INFO.Println("用户的IP: ", clientIp)
+
+	isDenyIp := infoService.GetDenyIpStatus(clientIp)
+	if isDenyIp {
+		return c.RenderError(-100, "IP被禁")
+	}
+
 	var agentId int
 	if c.UserId() > 0 {
 		userinfo := userService.GetBasicInfo(c.UserId())
@@ -44,15 +52,7 @@ func (c ApiInfoController) Config() revel.Result {
 		agentId = 1
 	}
 
-	clientIp := c.Request.Header.Get("X-Forwarded-For")
-	revel.INFO.Println("用户的IP: ", clientIp)
-	isDenyIp := infoService.GetDenyIpStatus(clientIp)
-
 	data := infoService.GetAgentConfig(agentId)
-	if data != nil {
-		data["deny_ip"] = isDenyIp
-	}
-
 	return c.RenderOK(data)
 }
 
@@ -64,6 +64,14 @@ func (c ApiInfoController) Teachers() revel.Result {
 
 // 直播配置
 func (c ApiInfoController) VideoConfig() revel.Result {
+	clientIp := c.Request.Header.Get("X-Forwarded-For")
+	revel.INFO.Println("用户的IP: ", clientIp)
+
+	isDenyIp := infoService.GetDenyIpStatus(clientIp)
+	if isDenyIp {
+		return c.RenderError(-100, "IP被禁")
+	}
+
 	data := infoService.GetVideoConfig()
 	return c.RenderOK(data)
 }
