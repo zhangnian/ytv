@@ -317,22 +317,25 @@ func (this UserService) CheckToken(userid int, token string) bool {
 }
 
 func (this UserService) GetManagerInfo(userid int) map[string]interface{} {
-	sql := `SELECT a.id, a.nickname FROM tb_admin a LEFT JOIN tb_users u ON a.id = u.manager_id WHERE u.id=?`
+	sql := `SELECT a.id, a.nickname, a.qq, a.telephone FROM tb_admin a LEFT JOIN tb_users u ON a.id = u.manager_id WHERE u.id=?`
 	rows, err := db.Query(sql, userid)
 	checkSQLError(err)
 
 	if rows.Next() {
 		var managerId int
-		var managerNick string
+		var managerNick, qq, telephone string
 
-		err = rows.Scan(&managerId, managerNick)
+		err = rows.Scan(&managerId, &managerNick, &qq, &telephone)
 		if err != nil {
+			revel.ERROR.Println("rows.Scan error: ", err)
 			return nil
 		}
 
 		data := make(map[string]interface{})
 		data["id"] = managerId
 		data["nickname"] = managerNick
+		data["qq"] = qq
+		data["telephone"] = telephone
 		return data
 	}
 
