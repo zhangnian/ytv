@@ -316,6 +316,29 @@ func (this UserService) CheckToken(userid int, token string) bool {
 	return dbToken == token
 }
 
+func (this UserService) GetManagerInfo(userid int) map[string]interface{} {
+	sql := `SELECT a.id, a.nickname FROM tb_admin a LEFT JOIN tb_users u ON a.id = u.manager_id WHERE u.id=?`
+	rows, err := db.Query(sql, userid)
+	checkSQLError(err)
+
+	if rows.Next() {
+		var managerId int
+		var managerNick string
+
+		err = rows.Scan(&managerId, managerNick)
+		if err != nil {
+			return nil
+		}
+
+		data := make(map[string]interface{})
+		data["id"] = managerId
+		data["nickname"] = managerNick
+		return data
+	}
+
+	return nil
+}
+
 func (this UserService) GetBasicInfo(userid int) map[string]interface{} {
 	rows, err := db.Query(`SELECT nickname, email, telephone, qq, level, avatar, agent_id, manager_id, deny, deny_chat, backgroud_img FROM tb_users WHERE id = ?`, userid)
 	checkSQLError(err)

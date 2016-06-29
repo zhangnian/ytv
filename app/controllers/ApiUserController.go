@@ -40,10 +40,13 @@ func (c ApiUserController) Login() revel.Result {
 		return c.RenderError(-1, "禁止登陆")
 	}
 
+	managerInfo := userService.GetManagerInfo(userid)
+
 	data := make(map[string]interface{})
 	data["userid"] = userid
 	data["token"] = token
 	data["basic"] = userinfo
+	data["manager"] = managerInfo
 	return c.RenderOK(data)
 }
 
