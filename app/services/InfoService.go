@@ -323,3 +323,26 @@ func (this InfoService) GetSharedFileList() []interface{} {
 
 	return data
 }
+
+func (this InfoService) GetDenyIpStatus(ip string) (isDeny bool) {
+	sql := `SELECT INET_NTOA(ip) FROM tb_deny_ips`
+	rows, err := db.Query(sql)
+	checkSQLError(err)
+
+	isDeny = false
+	for rows.Next() {
+		var denyedIp string
+		err = rows.Scan(&denyedIp)
+		if err != nil {
+			revel.ERROR.Println("rows.Scan error")
+			continue
+		}
+
+		if ip == denyedIp {
+			isDeny = true
+			break
+		}
+	}
+
+	return
+}

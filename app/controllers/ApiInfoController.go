@@ -43,7 +43,16 @@ func (c ApiInfoController) Config() revel.Result {
 	if agentId == 0 {
 		agentId = 1
 	}
+
+	clientIp := c.Request.Header.Get("X-Forwarded-For")
+	revel.INFO.Println("用户的IP: ", clientIp)
+	isDenyIp := infoService.GetDenyIpStatus(clientIp)
+
 	data := infoService.GetAgentConfig(agentId)
+	if data != nil {
+		data["deny_ip"] = isDenyIp
+	}
+
 	return c.RenderOK(data)
 }
 
