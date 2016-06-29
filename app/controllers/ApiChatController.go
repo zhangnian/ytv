@@ -52,7 +52,7 @@ func (c ApiChatController) Total() revel.Result {
 		userService.AddOnlineTimes(c.UserId(), clientIp)
 	}
 
-	managerOnline := true
+	managerOnline := 1
 
 	return c.RenderOK(map[string]int{"total": total, "members": members, "deny_chat": denyStatus, "deny_sec": denySec, "managerOnline": managerOnline})
 }
