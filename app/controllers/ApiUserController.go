@@ -69,7 +69,7 @@ func (c ApiUserController) Register() revel.Result {
 
 	userid, err := userService.Register(info)
 	if err != nil {
-		return c.RenderError(-1, "注册失败")
+		return c.RenderError(-1, err.Error())
 	}
 
 	revel.INFO.Println("新注册用户的userid为: ", userid)

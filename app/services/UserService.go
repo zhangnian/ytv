@@ -125,7 +125,7 @@ func (this UserService) Register(info model.RegisterUserInfo) (int, error) {
 		var cnt int
 		rows.Scan(&cnt)
 
-		if cnt == 1 {
+		if cnt >= 1 {
 			return 0, errors.New("用户名已被注册")
 		}
 	}
