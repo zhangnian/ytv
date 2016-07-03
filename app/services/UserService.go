@@ -343,22 +343,23 @@ func (this UserService) GetManagerInfo(userid int) map[string]interface{} {
 }
 
 func (this UserService) GetBasicInfo(userid int) map[string]interface{} {
-	rows, err := db.Query(`SELECT nickname, email, telephone, qq, level, avatar, agent_id, manager_id, deny, deny_chat, backgroud_img FROM tb_users WHERE id = ?`, userid)
+	rows, err := db.Query(`SELECT username, nickname, email, telephone, qq, level, avatar, agent_id, manager_id, deny, deny_chat, backgroud_img FROM tb_users WHERE id = ?`, userid)
 	checkSQLError(err)
 	defer rows.Close()
 
 	data := make(map[string]interface{})
 	if rows.Next() {
-		var nickname, email, telephone, qq, avatar string
+		var username, nickname, email, telephone, qq, avatar string
 		var level, agentId, managerId, deny, denyChat, backgroudImg int
 
-		err := rows.Scan(&nickname, &email, &telephone, &qq, &level, &avatar, &agentId, &managerId, &deny, &denyChat, &backgroudImg)
+		err := rows.Scan(&username, &nickname, &email, &telephone, &qq, &level, &avatar, &agentId, &managerId, &deny, &denyChat, &backgroudImg)
 		if err != nil {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			return nil
 		}
 
 		data["userid"] = userid
+		data["username"] = username
 		data["nickname"] = nickname
 		data["email"] = email
 		data["telphone"] = telephone
