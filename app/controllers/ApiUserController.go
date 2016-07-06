@@ -172,6 +172,7 @@ func (c ApiUserController) QQLogin() revel.Result {
 		data["basic"] = userinfo
 	}
 
+	userService.RecordUV(userid, c.Host())
 	return c.RenderOK(data)
 }
 
