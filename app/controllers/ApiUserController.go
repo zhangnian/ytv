@@ -85,6 +85,8 @@ func (c ApiUserController) Register() revel.Result {
 		return c.RenderError(-1, "获取用户数据失败")
 	}
 
+	userService.RecordUV(userid, c.Host())
+
 	data := make(map[string]interface{})
 	data["userid"] = userid
 	data["token"] = token
