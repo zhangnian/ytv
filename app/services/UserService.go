@@ -316,6 +316,25 @@ func (this UserService) CheckToken(userid int, token string) bool {
 	return dbToken == token
 }
 
+func (this UserService) RecordUV(userid int, host string) {
+	var managerId int
+	managerInfo := this.GetManagerInfo(userid)
+	if managerInfo == nil {
+		managerId = 3
+	}
+
+	key := fmt.Sprintf("UV:MANAGER:%s:%d", time.Now().Format("2006-01-02"), managerId)
+
+	redConn := db.RedisPool.Get()
+	defer redConn.Close()
+	redConn.Do("SADD", key, userid)
+
+	if len(host) > 0 {
+		key = fmt.Sprintf("UV:HOST:%s:%s", time.Now().Format("2006-01-02"), host)
+		redConn.Do("SADD", key, userid)
+	}
+}
+
 func (this UserService) GetManagerInfo(userid int) map[string]interface{} {
 	sql := `SELECT a.id, a.nickname, a.qq, a.telephone FROM tb_admin a LEFT JOIN tb_users u ON a.id = u.manager_id WHERE u.id=?`
 	rows, err := db.Query(sql, userid)

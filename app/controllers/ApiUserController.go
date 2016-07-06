@@ -40,6 +40,8 @@ func (c ApiUserController) Login() revel.Result {
 		return c.RenderError(-1, "禁止登陆")
 	}
 
+	userService.RecordUV(userid, c.Host())
+
 	managerInfo := userService.GetManagerInfo(userid)
 
 	data := make(map[string]interface{})
