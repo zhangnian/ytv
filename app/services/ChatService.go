@@ -89,6 +89,37 @@ func (this ChatService) SendManagerMsg(userid int, managerId int, content string
 	return true
 }
 
+func (this ChatService) GetManagerMsg(userid int) []map[string]interface{} {
+	sql := `SELECT id, sender_uid, content, create_time FROM tb_chat_manager WHERE sender_uid = ? OR recver_uid = ? ORDER BY id DESC`
+	rows, err := db.Query(sql, userid, userid)
+	checkSQLError(err)
+
+	data := make([]map[string]interface{}, 0)
+	for rows.Next() {
+		var msgId, senderUid int
+		var content, create_time string
+
+		err = rows.Scan(&msgId, &senderUid, &content, &create_time)
+		if err != nil {
+			continue
+		}
+
+		item := make(map[string]interface{})
+		item["id"] = msgId
+		item["content"] = content
+		item["create_time"] = create_time
+		if senderUid > 10000 {
+			item["type"] = 1
+		} else {
+			item["type"] = 2
+		}
+
+		data = append(data, item)
+	}
+
+	return data
+}
+
 func (this ChatService) FilterDirtyWords(content string) (newContent string) {
 	newContent = content
 

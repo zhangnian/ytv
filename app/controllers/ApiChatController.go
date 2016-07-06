@@ -102,3 +102,8 @@ func (c ApiChatController) SendManagerMsg() revel.Result {
 
 	return c.RenderOK(nil)
 }
+
+func (c ApiChatController) GetManagerMsg() revel.Result {
+	data := chatService.GetManagerMsg(c.UserId())
+	return c.RenderOK(data)
+}
