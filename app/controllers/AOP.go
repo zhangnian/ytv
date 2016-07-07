@@ -75,7 +75,7 @@ func recordStat(c *revel.Controller) revel.Result {
 
 func InitAOP() {
 	// 注意这里的拦截器顺序
-	//revel.InterceptFunc(validateUser, revel.BEFORE, revel.ALL_CONTROLLERS)
+	revel.InterceptFunc(validateUser, revel.BEFORE, revel.ALL_CONTROLLERS)
 	//revel.InterceptFunc(validateRole, revel.BEFORE, revel.ALL_CONTROLLERS)
 	//revel.InterceptFunc(recordStat, revel.FINALLY, revel.ALL_CONTROLLERS)
 }
