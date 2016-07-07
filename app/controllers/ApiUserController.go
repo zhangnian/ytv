@@ -76,10 +76,13 @@ func (c ApiUserController) AnonymousLogin() revel.Result {
 
 	userService.RecordUV(userid, c.Host())
 
+	managerInfo := userService.GetManagerInfo(userid)
+
 	data := make(map[string]interface{})
 	data["userid"] = userid
 	data["token"] = token
 	data["basic"] = userinfo
+	data["manager"] = managerInfo
 	return c.RenderOK(data)
 }
 
