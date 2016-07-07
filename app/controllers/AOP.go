@@ -8,7 +8,10 @@ import (
 )
 
 func isCheck(path string) bool {
-	noCheckUrls := [...]string{"/user/register", "/user/getcode", "/user/login", "/user/checkcode", "/info/config", "/info/videoconfig"}
+	noCheckUrls := [...]string{"/user/register", "/user/getcode", "/user/login", "/user/checkcode", "/info/config",
+		"/info/videoconfig", "/user/anonymouslogin", "/info/announcements", "/info/teachers", "/chat/total", "/chat/lastmsg",
+		"/info/BackgroudImgs"}
+
 	for _, url := range noCheckUrls {
 		if url == path {
 			return false
