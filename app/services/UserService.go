@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/garyburd/redigo/redis"
 	"github.com/revel/revel"
-	"math/rand"
 	"strings"
 	"time"
 	"ytv/app/db"
@@ -128,11 +127,7 @@ func (this UserService) AnonymousLogin(managerId int) (int, error) {
 		rows.Scan(&avatar)
 	}
 
-	buf := make([]byte, 4)
-	for i := 0; i < 4; i++ {
-		buf[i] = byte(rand.Intn(26)) + byte('a')
-	}
-	username := fmt.Sprintf("游客%s", string(buf))
+	username := "游客"
 
 	sql = `INSERT INTO tb_users(username, nickname, manager_id, role_id, avatar, create_time, modify_time, last_time)
 		   VALUES(?, ?, ?, ?, ?, NOW(), NOW(), NOW())`
@@ -144,6 +139,11 @@ func (this UserService) AnonymousLogin(managerId int) (int, error) {
 		revel.ERROR.Printf("DB返回失败: %s\n", err.Error())
 		return 0, err
 	}
+
+	username = fmt.Sprintf("游客%d", int(insertId))
+
+	sql = `UPDATE tb_users SET username=?, nickname=? WHERE id=?`
+	db.Exec(sql, username, username, insertId)
 
 	return int(insertId), nil
 }
