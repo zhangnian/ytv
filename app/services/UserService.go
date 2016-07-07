@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/garyburd/redigo/redis"
 	"github.com/revel/revel"
+	"math/rand"
 	"strings"
 	"time"
 	"ytv/app/db"
@@ -14,8 +15,8 @@ import (
 )
 
 const (
-	USER_TYPE_NORMAL = 1 // 普通会员
-	USER_ANCHOR      = 2 // 主播
+	USER_TYPE_NORMAL    = 1 // 普通会员
+	USER_TYPE_ANONYMOUS = 2 // 游客
 )
 
 type UserService struct {
@@ -99,7 +100,7 @@ func (this UserService) GetAgent(host string, source map[string]int) (managerId 
 		companyId = 1
 	}
 
-	sql := `SELECT id FROM tb_admin WHERE group_id =4 AND team_id IN (SELECT id FROM tb_teams WHERE company_id = ?) ORDER BY RAND() LIMIT 0, 1`
+	sql := `SELECT id FROM tb_admin WHERE group_id = 4 AND team_id IN (SELECT id FROM tb_teams WHERE company_id = ?) ORDER BY RAND() LIMIT 0, 1`
 	rows, err := db.Query(sql, companyId)
 	checkSQLError(err)
 	defer rows.Close()
@@ -113,6 +114,38 @@ func (this UserService) GetAgent(host string, source map[string]int) (managerId 
 
 	managerId = 1
 	return
+}
+
+func (this UserService) AnonymousLogin(managerId int) (int, error) {
+	// 随机选一张头像
+	sql := `SELECT avatar FROM tb_avatar_pool ORDER BY RAND() LIMIT 0, 1`
+	rows, err := db.Query(sql)
+	checkSQLError(err)
+	defer rows.Close()
+
+	avatar := ""
+	if rows.Next() {
+		rows.Scan(&avatar)
+	}
+
+	buf := make([]byte, 4)
+	for i := 0; i < 4; i++ {
+		buf[i] = byte(rand.Intn(26)) + byte('a')
+	}
+	username := fmt.Sprintf("游客%s", string(buf))
+
+	sql = `INSERT INTO tb_users(username, nickname, manager_id, role_id, avatar, create_time, modify_time, last_time)
+		   VALUES(?, ?, ?, ?, ?, NOW(), NOW(), NOW())`
+	rs, err := db.Exec(sql, username, username, managerId, USER_TYPE_ANONYMOUS, avatar)
+	checkSQLError(err)
+
+	insertId, err := rs.LastInsertId()
+	if err != nil {
+		revel.ERROR.Printf("DB返回失败: %s\n", err.Error())
+		return 0, err
+	}
+
+	return int(insertId), nil
 }
 
 func (this UserService) Register(info model.RegisterUserInfo) (int, error) {
@@ -362,16 +395,16 @@ func (this UserService) GetManagerInfo(userid int) map[string]interface{} {
 }
 
 func (this UserService) GetBasicInfo(userid int) map[string]interface{} {
-	rows, err := db.Query(`SELECT username, nickname, email, telephone, qq, level, avatar, agent_id, manager_id, deny, deny_chat, backgroud_img FROM tb_users WHERE id = ?`, userid)
+	rows, err := db.Query(`SELECT username, nickname, email, telephone, qq, level, avatar, agent_id, manager_id, deny, deny_chat, backgroud_img, role_id FROM tb_users WHERE id = ?`, userid)
 	checkSQLError(err)
 	defer rows.Close()
 
 	data := make(map[string]interface{})
 	if rows.Next() {
 		var username, nickname, email, telephone, qq, avatar string
-		var level, agentId, managerId, deny, denyChat, backgroudImg int
+		var level, agentId, managerId, deny, denyChat, backgroudImg, roleId int
 
-		err := rows.Scan(&username, &nickname, &email, &telephone, &qq, &level, &avatar, &agentId, &managerId, &deny, &denyChat, &backgroudImg)
+		err := rows.Scan(&username, &nickname, &email, &telephone, &qq, &level, &avatar, &agentId, &managerId, &deny, &denyChat, &backgroudImg, &roleId)
 		if err != nil {
 			revel.ERROR.Printf("rows.Scan error: %s\n", err)
 			return nil
@@ -390,6 +423,7 @@ func (this UserService) GetBasicInfo(userid int) map[string]interface{} {
 		data["deny"] = deny
 		data["denyChat"] = denyChat
 		data["backgroudImg"] = backgroudImg
+		data["role"] = roleId
 	}
 
 	return data

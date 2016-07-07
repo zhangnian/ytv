@@ -52,6 +52,37 @@ func (c ApiUserController) Login() revel.Result {
 	return c.RenderOK(data)
 }
 
+func (c ApiUserController) AnonymousLogin() revel.Result {
+	managerId := userService.GetAgent(c.Host(), c.Source())
+	if managerId <= 0 {
+		return c.RenderError(-1, "获取用户所属客户经理失败")
+	}
+
+	userid, err := userService.AnonymousLogin(managerId)
+	if err != nil {
+		return c.RenderError(-1, err.Error())
+	}
+
+	revel.INFO.Println("新注册用户的userid为: ", userid)
+	token, err := userService.RefreshToken(userid)
+	if err != nil {
+		return c.RenderError(-1, "刷新token失败")
+	}
+
+	userinfo := userService.GetBasicInfo(userid)
+	if userinfo == nil {
+		return c.RenderError(-1, "获取用户数据失败")
+	}
+
+	userService.RecordUV(userid, c.Host())
+
+	data := make(map[string]interface{})
+	data["userid"] = userid
+	data["token"] = token
+	data["basic"] = userinfo
+	return c.RenderOK(data)
+}
+
 func (c ApiUserController) Register() revel.Result {
 	var info model.RegisterUserInfo
 
