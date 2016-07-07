@@ -90,7 +90,7 @@ func (this ChatService) SendManagerMsg(userid int, managerId int, content string
 }
 
 func (this ChatService) GetManagerMsg(userid int) []map[string]interface{} {
-	sql := `SELECT id, sender_uid, content, create_time FROM tb_chat_manager WHERE sender_uid = ? OR recver_uid = ? ORDER BY id DESC`
+	sql := `SELECT id, sender_uid, content, create_time FROM tb_chat_manager WHERE sender_uid = ? OR recver_uid = ? ORDER BY id ASC LIMIT 15`
 	rows, err := db.Query(sql, userid, userid)
 	checkSQLError(err)
 
