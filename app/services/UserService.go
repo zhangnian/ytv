@@ -345,7 +345,6 @@ func (this UserService) CheckToken(userid int, token string) bool {
 		return false
 	}
 
-	//revel.INFO.Printf("user token: %s, db token:%s\n", token, dbToken)
 	return dbToken == token
 }
 
@@ -505,6 +504,31 @@ func (this UserService) ModifyPassword(userid int, newPasswd string) bool {
 	checkSQLError(err)
 
 	return true
+}
+
+func (this UserService) VerifyUser(username string, telephone string) map[string]interface{} {
+	sql := `SELECT id FROM tb_users WHERE username=? AND telephone=?`
+	rows, err := db.Query(sql, username, telephone)
+	checkSQLError(err)
+	defer rows.Close()
+
+	data := make(map[string]interface{})
+	var userid int
+	if rows.Next() {
+		err = rows.Scan(&userid)
+		if err != nil {
+			revel.ERROR.Println("rows.Scan error: ", err)
+		}
+
+	}
+
+	data["userid"] = userid
+	if userid > 0 {
+		data["token"], _ = this.GetToken(userid)
+	} else {
+		data["token"] = ""
+	}
+	return data
 }
 
 func (this UserService) ModifyInfo(userid int, nickname, qq, telephone, email string) bool {

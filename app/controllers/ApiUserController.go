@@ -242,3 +242,11 @@ func (c ApiUserController) ModifyInfo() revel.Result {
 
 	return c.RenderOK(nil)
 }
+
+func (c ApiUserController) VerifyUser() revel.Result {
+	username := c.Params.Get("username")
+	telephone := c.Params.Get("telephone")
+
+	data := userService.VerifyUser(username, telephone)
+	return c.RenderOK(data)
+}
