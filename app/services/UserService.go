@@ -371,6 +371,7 @@ func (this UserService) GetManagerInfo(userid int) map[string]interface{} {
 	sql := `SELECT a.id, a.nickname, a.qq, a.telephone FROM tb_admin a LEFT JOIN tb_users u ON a.id = u.manager_id WHERE u.id=?`
 	rows, err := db.Query(sql, userid)
 	checkSQLError(err)
+	defer rows.Close()
 
 	if rows.Next() {
 		var managerId int

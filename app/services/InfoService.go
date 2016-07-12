@@ -328,6 +328,7 @@ func (this InfoService) GetDenyIpStatus(ip string) (isDeny bool) {
 	sql := `SELECT INET_NTOA(ip) FROM tb_deny_ips`
 	rows, err := db.Query(sql)
 	checkSQLError(err)
+	defer rows.Close()
 
 	isDeny = false
 	for rows.Next() {
@@ -351,6 +352,7 @@ func (this InfoService) GetBackgroudImgs() []map[string]interface{} {
 	sql := `SELECT id, img_url FROM tb_backgroud_imgs ORDER BY id DESC`
 	rows, err := db.Query(sql)
 	checkSQLError(err)
+	defer rows.Close()
 
 	data := make([]map[string]interface{}, 0)
 	for rows.Next() {
