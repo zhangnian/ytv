@@ -49,7 +49,7 @@ func (this UserService) GetAgent(host string, source map[string]int) (managerId 
 
 	teamId, ok := source["teamId"]
 	if ok && teamId > 0 {
-		sql := `SELECT id FROM tb_admin WHERE group_id = 4 AND team_id = ? ORDER BY RAND() LIMIT 0, 1`
+		sql := `SELECT id FROM tb_admin WHERE DATE(last_time) = DATE(NOW()) AND group_id = 5 AND team_id = ? ORDER BY RAND() LIMIT 0, 1`
 		rows, err := db.Query(sql, teamId)
 		checkSQLError(err)
 		defer rows.Close()
@@ -65,7 +65,7 @@ func (this UserService) GetAgent(host string, source map[string]int) (managerId 
 
 	departmentId, ok := source["departmentId"]
 	if ok && departmentId > 0 {
-		sql := `SELECT id FROM tb_admin WHERE group_id =4 AND team_id IN (SELECT id FROM tb_teams WHERE department_id = ?) ORDER BY RAND() LIMIT 0, 1`
+		sql := `SELECT id FROM tb_admin WHERE DATE(last_time) = DATE(NOW()) AND group_id = 5 AND team_id IN (SELECT id FROM tb_teams WHERE department_id = ?) ORDER BY RAND() LIMIT 0, 1`
 		rows, err := db.Query(sql, departmentId)
 		checkSQLError(err)
 		defer rows.Close()
@@ -99,7 +99,7 @@ func (this UserService) GetAgent(host string, source map[string]int) (managerId 
 		companyId = 1
 	}
 
-	sql := `SELECT id FROM tb_admin WHERE group_id = 4 AND team_id IN (SELECT id FROM tb_teams WHERE company_id = ?) ORDER BY RAND() LIMIT 0, 1`
+	sql := `SELECT id FROM tb_admin WHERE DATE(last_time) = DATE(NOW()) AND group_id = 5 AND team_id IN (SELECT id FROM tb_teams WHERE company_id = ?) ORDER BY RAND() LIMIT 0, 1`
 	rows, err := db.Query(sql, companyId)
 	checkSQLError(err)
 	defer rows.Close()
