@@ -112,8 +112,8 @@ func (this UserService) GetAgent(host string, source map[string]int) (managerId 
 	}
 
 	// 随机分配一个manager
-	sql = `SELECT id FROM tb_admin WHERE group_id = 5 ORDER BY RAND() LIMIT 0, 1`
-	rows, err = db.Query(sql)
+	sql = `SELECT id FROM tb_admin WHERE group_id = 5 AND team_id IN (SELECT id FROM tb_teams WHERE company_id = ?) ORDER BY RAND() LIMIT 0, 1`
+	rows, err = db.Query(sql, companyId)
 	checkSQLError(err)
 	defer rows.Close()
 
