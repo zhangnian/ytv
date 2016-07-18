@@ -111,7 +111,21 @@ func (this UserService) GetAgent(host string, source map[string]int) (managerId 
 		}
 	}
 
-	managerId = 1
+	// 随机分配一个manager
+	sql = `SELECT id FROM tb_admin WHERE group_id = 5 ORDER BY RAND() LIMIT 0, 1`
+	rows, err = db.Query(sql)
+	checkSQLError(err)
+	defer rows.Close()
+
+	if rows.Next() {
+		err := rows.Scan(&managerId)
+		if err == nil && managerId > 0 {
+			revel.INFO.Printf("用户随机分配的managerId: %d\n", managerId)
+			return
+		}
+	}
+
+	managerId = 0
 	return
 }
 
